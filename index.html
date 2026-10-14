@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Andrew Latchman: Selected Works, a virtual hospital for Asterix Health</title>
+<meta name="description" content="A walkable 3D hospital where the CV is the exhibit. Presented for the Asterix Health team.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14151a;--paper:#f6f3ed;--red:#0a8f8f;--muted:#6a6c75;--line:rgba(20,21,26,.14);
+  --serif:"Playfair Display",Georgia,serif;--sans:"DM Sans","Helvetica Neue",Arial,sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0;background:#e9e6e0;color:var(--ink);font-family:var(--sans);overflow:hidden;-webkit-user-select:none;user-select:none}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+[hidden]{display:none!important}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none;touch-action:none;cursor:grab}
+#scene.locked{cursor:none}
+.chip{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:999px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#brand{position:fixed;left:16px;top:calc(14px + env(safe-area-inset-top,0px));padding:10px 18px;pointer-events:none}
+#brand b{display:block;font-family:var(--serif);font-style:italic;font-size:19px}
+#brand span{display:block;font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:2px}
+#bar{position:fixed;right:16px;top:calc(14px + env(safe-area-inset-top,0px));display:flex;gap:8px}
+.btn{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.9);color:var(--ink);font:700 13px var(--sans);letter-spacing:.04em;padding:10px 16px;border-radius:999px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn:hover{background:#fff}.btn:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.xbtn{position:fixed;left:16px;top:calc(72px + env(safe-area-inset-top,0px));width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--ink);font:700 20px var(--sans);cursor:pointer;box-shadow:0 6px 18px rgba(20,21,26,.18);z-index:5}
+.xbtn:hover{background:var(--red);color:#fff;border-color:var(--red)}.xbtn:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+#panel .x{position:absolute;right:14px;top:12px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--ink);font:700 16px var(--sans);cursor:pointer;line-height:1}
+#panel .x:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.btn.primary:hover{filter:brightness(1.06)}
+#cross{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(20,21,26,.55);box-shadow:0 0 0 2px rgba(255,255,255,.7);pointer-events:none}
+#tip{position:fixed;left:50%;top:calc(50% + 26px);transform:translateX(-50%);padding:8px 16px;font-size:13px;font-weight:700;pointer-events:none;white-space:nowrap}
+#tip i{font-style:normal;color:var(--red);margin-right:8px}
+#hint{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:10px 20px;font-size:13px;font-weight:500;pointer-events:none;transition:opacity .6s;text-align:center;max-width:92vw}
+#hint kbd{display:inline-block;padding:1px 7px;border-radius:6px;background:#fff;border:1px solid var(--line);font:700 11.5px var(--sans)}
+#panel{position:fixed;right:20px;top:calc(70px + env(safe-area-inset-top,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));width:min(420px,38vw);background:rgba(251,250,247,.96);border:1px solid var(--line);border-radius:22px;padding:26px 26px 20px;overflow:auto;box-shadow:0 24px 60px rgba(20,21,26,.22);display:flex;flex-direction:column}
+#panel .id{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--red)}
+#panel h2{font-family:var(--serif);font-size:clamp(26px,3vw,36px);line-height:1.1;margin:8px 0 6px}
+#panel .meta{font-size:14px;color:var(--muted);margin:0 0 14px;line-height:1.45}
+#panel .meta em{font-family:var(--serif);color:var(--ink)}
+#panel p.body{font-size:16px;line-height:1.6;margin:0 0 16px}
+#panel .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+#panel .chips span{border:1px solid var(--ink);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700}
+#panel .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;margin:0 0 16px}
+#panel .pill i{width:11px;height:11px;border-radius:50%;display:block}
+#panel .why{background:#e6f5f4;border:1px solid #b7dfdc;border-radius:12px;padding:12px 14px;margin:0 0 16px;font-size:14.5px;line-height:1.5}#panel .why b{display:block;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:#0a6f6f;margin-bottom:3px}
+#panel .nav{margin-top:auto;display:flex;gap:8px;align-items:center;padding-top:10px}
+#panel .nav .count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700}
+#tourbar{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:8px 10px 8px 18px;display:flex;gap:12px;align-items:center;font-size:13px;font-weight:700}
+#map{position:fixed;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:14px 16px 10px;background:rgba(251,250,247,.96);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(20,21,26,.2)}
+#map canvas{display:block;width:min(86vw,760px);height:auto;cursor:pointer}
+#map small{display:block;margin-top:6px;font-size:11.5px;color:var(--muted);text-align:center}
+#loading{position:fixed;inset:0;background:#f6f3ed;display:flex;align-items:center;justify-content:center;padding:24px;z-index:10;transition:opacity .6s}
+#loading .card{width:min(620px,100%);text-align:left}
+#loading .kick{font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--red);text-transform:uppercase}
+#loading h1{font-family:var(--serif);font-size:clamp(44px,9vw,86px);line-height:.95;margin:10px 0 12px;letter-spacing:-.01em}
+#loading h1 i{color:var(--red)}
+#loading p{font-size:16px;line-height:1.6;color:#33343a;margin:0 0 18px}
+#loading .barwrap{height:4px;background:rgba(20,21,26,.12);border-radius:3px;overflow:hidden;margin:0 0 18px}
+#loading .barwrap div{height:100%;width:0;background:var(--red);transition:width .15s}
+#loading .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#loading small{display:block;margin-top:18px;font-size:12.5px;color:var(--muted);line-height:1.6}
+#joy{position:fixed;left:22px;bottom:calc(86px + env(safe-area-inset-bottom,0px));width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid rgba(20,21,26,.25);touch-action:none}
+#joy i{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(229,50,43,.85)}
+@media (max-width:820px){
+  #panel{left:12px;right:12px;top:auto;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;max-height:46vh;border-radius:18px}
+  #brand b{font-size:16px}.btn{padding:9px 13px}
+  #hint{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+}
+@media (prefers-reduced-motion:reduce){#hint,#loading{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="scene" tabindex="0" aria-label="3D hospital view. Use the buttons or keyboard to explore."></canvas>
+<div id="cross" hidden></div>
+<div id="tip" class="chip" hidden></div>
+<div id="brand" class="chip" hidden><b>Andrew Latchman</b><span>Selected works, 2019 to 2026</span></div>
+<button id="xClose" class="xbtn" hidden aria-label="Close this work (Esc)" title="Close (Esc)">&#10005;</button>
+<div id="bar" hidden><button class="btn primary" id="bTour">Take the tour</button><button class="btn" id="bLite" title="Switch to a lighter, smoother mode">Smooth mode</button><button class="btn" id="bMap">Floor plan</button><button class="btn" id="bContact">Contact</button></div>
+<div id="hint" class="chip" hidden></div>
+<div id="tourbar" class="chip" hidden><span id="tourTxt">Tour</span><button class="btn" id="tPrev">Back</button><button class="btn" id="tNext">Next</button><button class="btn" id="tStop">Stop</button></div>
+<div id="map" hidden><canvas id="mapc" width="1520" height="300"></canvas><small>Click a room to go there. Press M to close.</small></div>
+<aside id="panel" hidden aria-live="polite"></aside>
+<div id="joy" hidden><i></i></div>
+<div id="loading">
+  <div class="card">
+    <div class="kick">A virtual hospital for Asterix Health</div>
+    <h1>Andrew<br><i>Latchman</i></h1>
+    <p>Selected works, 2019 to 2026. A walkable hospital where the CV is the exhibit: strategic initiatives, AI and automation, and the people side of operations, laid out as a ward round and rendered in 3D.</p>
+    <div class="barwrap"><div id="bar2"></div></div>
+    <div class="row"><button class="btn primary" id="enter" disabled>Preparing the hospital...</button><button class="btn" id="enterTour" disabled>Start with the tour</button></div>
+    <small id="loadnote">Walk with WASD or the arrow keys and look with the mouse. Click any work to read about it. On a phone, use the joystick and drag to look.</small>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+'use strict';
+/* ===== artworks: shared helpers ===== */
+const F = { serif: '"Playfair Display", Georgia, serif', sans: '"DM Sans", "Helvetica Neue", Arial, sans-serif' };
+const K = { paper: '#f6f3ed', cream: '#efe9dd', ink: '#14151a', red: '#e5322b', blue: '#2446d8', yellow: '#ffc83d', green: '#17a05f', navy: '#0b1026', cyan: '#59e3ff', lime: '#c8ff5a', pink: '#ff6fb5', grey: '#8b8f99', mid: '#c9c5bb', teal: '#0f8b8d', peach: '#ffc9a8', sage: '#b9cdb0', lilac: '#cbbbe6' };
+function rng(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function txt(g, s, x, y, size, font, color, align, weight){ g.font = (weight || '400') + ' ' + size + 'px ' + font; g.fillStyle = color; g.textAlign = align || 'left'; g.textBaseline = 'alphabetic'; g.fillText(s, x, y); }
+function wrap(g, s, x, y, maxW, lh){ const words = s.split(' '); let line = ''; for (const w of words){ const t = line ? line + ' ' + w : w; if (g.measureText(t).width > maxW && line){ g.fillText(line, x, y); line = w; y += lh; } else line = t; } if (line){ g.fillText(line, x, y); y += lh; } return y; }
+function rrect(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+function bg(g, W, H, c){ g.fillStyle = c; g.fillRect(0, 0, W, H); }
+function spaced(g, s, x, y, size, font, color, sp, weight){ g.font = (weight || '700') + ' ' + size + 'px ' + font; g.fillStyle = color; g.textAlign = 'left'; let cx = x; for (const ch of s){ g.fillText(ch, cx, y); cx += g.measureText(ch).width + sp; } return cx; }
+function arrow(g, x1, y1, x2, y2, c, lw, head){ g.strokeStyle = c; g.fillStyle = c; g.lineWidth = lw; g.lineCap = 'round'; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); const a = Math.atan2(y2 - y1, x2 - x1); g.beginPath(); g.moveTo(x2, y2); g.lineTo(x2 - head * Math.cos(a - 0.45), y2 - head * Math.sin(a - 0.45)); g.lineTo(x2 - head * Math.cos(a + 0.45), y2 - head * Math.sin(a + 0.45)); g.closePath(); g.fill(); }
+function check(g, cx, cy, r, c, lw){ g.strokeStyle = c; g.lineWidth = lw; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(cx - r * 0.5, cy); g.lineTo(cx - r * 0.1, cy + r * 0.4); g.lineTo(cx + r * 0.55, cy - r * 0.4); g.stroke(); }
+const ART = {};
+
+/* ---------- entrance ---------- */
+ART.statement = (g, W, H) => {
+  const u = W / 1000; bg(g, W, H, '#fbfaf7');
+  g.fillStyle = K.red; g.fillRect(60 * u, 70 * u, 8 * u, 120 * u);
+  txt(g, 'Artist statement', 100 * u, 150 * u, 74 * u, F.serif, K.ink, 'left', 'italic 700');
+  g.font = '400 ' + 31 * u + 'px ' + F.sans; g.fillStyle = '#23242a'; let y = 270 * u; const lh = 46 * u, mw = 860 * u;
+  const paras = [
+    'Andrew Latchman builds practical operating systems, embeds AI into them and gets teams using them at scale.',
+    'Over four years of program and project delivery, the last two and a half inside a two-person PMO, he has moved between strategy and hands-on work: scoping an ambiguous problem from a blank page, then building, shipping and QA-ing the fix himself.',
+    'His materials are HubSpot, eduMe, Monday.com, n8n and Claude. His subjects are drivers, support queues, ledgers and the people who use them every day.',
+    'The exhibition is arranged around four ideas: rethinking process, building with AI, bringing people along, and the story so far.'
+  ];
+  for (const p of paras){ y = wrap(g, p, 70 * u, y, mw, lh) + 22 * u; }
+};
+ART.num1 = (g, W, H) => {
+  const u = W / 1000; bg(g, W, H, K.paper);
+  g.fillStyle = K.red; g.fillRect(0, 0, W, 26 * u);
+  txt(g, '1,500+', 60 * u, 500 * u, 290 * u, F.serif, K.red, 'left', '700');
+  txt(g, 'drivers', 66 * u, 600 * u, 100 * u, F.serif, K.ink, 'left', 'italic 400');
+  g.fillStyle = K.ink; g.fillRect(66 * u, 680 * u, W - 132 * u, 3 * u);
+  g.font = '500 ' + 38 * u + 'px ' + F.sans; g.fillStyle = '#2a2b31'; let y = 760 * u;
+  y = wrap(g, 'moved onto a new CRM, trained through a redesigned journey and onboarded to a new login system.', 66 * u, y, 860 * u, 54 * u) + 24 * u;
+  g.fillStyle = K.ink; txt(g, '50+', 66 * u, y + 70 * u, 100 * u, F.serif, K.ink, 'left', '700'); txt(g, 'users migrated', 290 * u, y + 70 * u, 40 * u, F.sans, K.ink, 'left', '500');
+  txt(g, '30+', 66 * u, y + 190 * u, 100 * u, F.serif, K.ink, 'left', '700'); txt(g, 'colleagues on the workflows', 290 * u, y + 190 * u, 40 * u, F.sans, K.ink, 'left', '500');
+};
+ART.num2 = (g, W, H) => {
+  const u = W / 1000; bg(g, W, H, K.navy);
+  g.fillStyle = K.lime; g.fillRect(0, H - 26 * u, W, 26 * u);
+  txt(g, '36%', 60 * u, 470 * u, 330 * u, F.serif, K.lime, 'left', '700');
+  txt(g, 'swing', 66 * u, 570 * u, 100 * u, F.serif, '#ffffff', 'left', 'italic 400');
+  g.fillStyle = '#ffffff'; g.fillRect(66 * u, 650 * u, W - 132 * u, 3 * u);
+  g.font = '500 ' + 38 * u + 'px ' + F.sans; g.fillStyle = '#e4e8ff'; let y = 730 * u;
+  y = wrap(g, 'from negative to positive sentiment, measured after launching a customer-facing AI chatbot.', 66 * u, y, 860 * u, 54 * u) + 24 * u;
+  txt(g, '4', 66 * u, y + 70 * u, 100 * u, F.serif, '#ffffff', 'left', '700'); txt(g, 'years of program delivery', 190 * u, y + 70 * u, 40 * u, F.sans, '#ffffff', 'left', '500');
+  txt(g, '2.5', 66 * u, y + 190 * u, 100 * u, F.serif, '#ffffff', 'left', '700'); txt(g, 'of them inside a two-person PMO', 290 * u, y + 190 * u, 40 * u, F.sans, '#ffffff', 'left', '500');
+};
+
+/* ---------- room I: rethinking process ---------- */
+ART.stage = (g, W, H) => {
+  const u = W / 1000; bg(g, W, H, K.paper); const R = rng(7);
+  txt(g, 'From status', 50 * u, 120 * u, 78 * u, F.serif, K.ink, 'left', 'italic 700'); txt(g, 'to stage', 560 * u, 120 * u, 78 * u, F.serif, K.red, 'left', 'italic 700');
+  // left: status spaghetti
+  const labels = ['Pending', 'Waiting', 'In review', 'Blocked', 'Active', 'On hold', 'Chasing', 'Stuck', 'Unknown', 'Maybe', 'Done?', 'Late'];
+  g.strokeStyle = 'rgba(20,21,26,.28)'; g.lineWidth = 2.5 * u;
+  const pts = labels.map(() => [90 * u + R() * 400 * u, 210 * u + R() * 560 * u]);
+  for (let i = 0; i < 26; i++){ const a = pts[Math.floor(R() * pts.length)], b = pts[Math.floor(R() * pts.length)]; g.beginPath(); g.moveTo(a[0], a[1]); g.bezierCurveTo(a[0] + 120 * u * (R() - .5) * 2, a[1] + 160 * u * (R() - .5) * 2, b[0] + 140 * u * (R() - .5) * 2, b[1] + 100 * u * (R() - .5) * 2, b[0], b[1]); g.stroke(); }
+  labels.forEach((l, i) => { const [x, y] = pts[i], w = (l.length * 15 + 40) * u; g.fillStyle = ['#ffd9d5', '#fff0c2', '#d9e4ff', '#e6e2d8'][i % 4]; rrect(g, x - w / 2, y - 24 * u, w, 48 * u, 24 * u); g.fill(); g.strokeStyle = 'rgba(20,21,26,.4)'; g.lineWidth = 2 * u; g.stroke(); txt(g, l, x, y + 8 * u, 24 * u, F.sans, K.ink, 'center', '500'); });
+  // right: five clean stages
+  const bx = 560 * u, bw = 76 * u, gap = 18 * u, base = 800 * u;
+  for (let i = 0; i < 5; i++){ const h = (110 + i * 95) * u; g.fillStyle = i === 4 ? K.red : K.ink; g.fillRect(bx + i * (bw + gap), base - h, bw, h); txt(g, String(i + 1), bx + i * (bw + gap) + bw / 2, base - h + 56 * u, 40 * u, F.serif, '#ffffff', 'center', '700'); }
+  g.fillStyle = K.ink; g.fillRect(bx - 12 * u, base, 5 * (bw + gap) + 6 * u, 4 * u);
+  g.font = '500 ' + 28 * u + 'px ' + F.sans; g.fillStyle = '#3a3b42'; g.textAlign = 'left';
+  txt(g, 'STAGE-BASED JOURNEY', bx - 8 * u, base + 52 * u, 24 * u, F.sans, K.red, 'left', '700');
+  txt(g, 'STATUS-BASED, BEFORE', 70 * u, base + 52 * u, 24 * u, F.sans, K.grey, 'left', '700');
+  arrow(g, 470 * u, 520 * u, 545 * u, 520 * u, K.red, 8 * u, 30 * u);
+};
+ART.bigbang = (g, W, H) => {
+  const u = W / 1000; bg(g, W, H, '#080b1c'); const R = rng(11);
+  const cx = W * 0.5, cy = H * 0.46;
+  const rg = g.createRadialGradient(cx, cy, 0, cx, cy, H * 0.7); rg.addColorStop(0, 'rgba(229,50,43,.55)'); rg.addColorStop(0.35, 'rgba(229,50,43,.12)'); rg.addColorStop(1, 'rgba(8,11,28,0)'); g.fillStyle = rg; g.fillRect(0, 0, W, H);
+  // 50 squares (the old tool) on the left, 50 dots (the new CRM) on the right
+  for (let i = 0; i < 50; i++){ const a = R() * Math.PI * 2, r = Math.sqrt(R()) * 190 * u; const x = 190 * u + Math.cos(a) * r, y = cy + Math.sin(a) * r * 1.1; g.fillStyle = 'rgba(160,170,210,.8)'; g.fillRect(x - 9 * u, y - 9 * u, 18 * u, 18 * u); }
+  for (let i = 0; i < 50; i++){ const a = R() * Math.PI * 2, r = Math.sqrt(R()) * 190 * u; const x = W - 190 * u + Math.cos(a) * r, y = cy + Math.sin(a) * r * 1.1; g.fillStyle = K.red; g.beginPath(); g.arc(x, y, 10 * u, 0, Math.PI * 2); g.fill(); }
+  // the bang: 1,500 points
+  for (let i = 0; i < 1500; i++){ const a = R() * Math.PI * 2, r = Math.pow(R(), 1.6) * H * 0.62; const x = cx + Math.cos(a) * r * 1.5, y = cy + Math.sin(a) * r; const al = 0.9 - r / (H * 0.7); if (al <= 0.04) continue; g.fillStyle = (i % 9 === 0) ? 'rgba(255,200,61,' + al + ')' : 'rgba(255,255,255,' + al + ')'; g.beginPath(); g.arc(x, y, (1.2 + R() * 2.2) * u, 0, Math.PI * 2); g.fill(); }
+  g.strokeStyle = 'rgba(255,255,255,.2)'; g.lineWidth = 1.5 * u; for (let i = 0; i < 40; i++){ const a = (i / 40) * Math.PI * 2; g.beginPath(); g.moveTo(cx + Math.cos(a) * 60 * u, cy + Math.sin(a) * 60 * u); g.lineTo(cx + Math.cos(a) * 520 * u * 1.5, cy + Math.sin(a) * 520 * u); g.stroke(); }
+  txt(g, 'BIG BANG', cx, cy + 40 * u, 150 * u, F.serif, '#ffffff', 'center', '700');
+  txt(g, 'MONDAY.COM', 190 * u, H - 36 * u, 26 * u, F.sans, '#b5bdea', 'center', '700'); txt(g, 'HUBSPOT', W - 190 * u, H - 36 * u, 26 * u, F.sans, K.red, 'center', '700');
+  txt(g, '50+ users   ·   1,500+ drivers   ·   30+ daily', cx, H - 96 * u, 28 * u, F.sans, '#ffffff', 'center', '500');
+};
+ART.tickets = (g, W, H) => {
+  const u = W / 1000; bg(g, W, H, K.paper); const R = rng(21);
+  txt(g, 'Bug reports,', 50 * u, 120 * u, 76 * u, F.serif, K.ink, 'left', 'italic 700'); txt(g, 'ordered', 560 * u, 120 * u, 76 * u, F.serif, K.red, 'left', 'italic 700');
+  const cols = ['#fff0a8', '#ffc9d6', '#bfe6ff', '#d6f2c2'];
+  for (let i = 0; i < 22; i++){ const x = 120 * u + R() * 340 * u, y = 230 * u + R() * 480 * u, s = (110 + R() * 40) * u; g.save(); g.translate(x, y); g.rotate((R() - .5) * 0.7); g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(-s / 2 + 5 * u, -s / 2 + 7 * u, s, s); g.fillStyle = cols[i % 4]; g.fillRect(-s / 2, -s / 2, s, s); g.strokeStyle = 'rgba(20,21,26,.55)'; g.lineWidth = 2 * u; g.beginPath(); for (let k = 0; k < 3; k++){ g.moveTo(-s / 2 + 12 * u, -s / 2 + (28 + k * 22) * u); g.lineTo(s / 2 - 14 * u - R() * 30 * u, -s / 2 + (28 + k * 22) * u + (R() - .5) * 5 * u); } g.stroke(); g.restore(); }
+  const heads = ['NEW', 'IN PROGRESS', 'RESOLVED'], cw = 128 * u, cg = 14 * u, x0 = 560 * u;
+  heads.forEach((h, i) => { const x = x0 + i * (cw + cg); g.fillStyle = '#e9e4d8'; rrect(g, x, 200 * u, cw, 580 * u, 10 * u); g.fill(); txt(g, h, x + cw / 2, 236 * u, 15 * u, F.sans, K.ink, 'center', '700');
+    const n = [3, 2, 5][i]; for (let k = 0; k < n; k++){ g.fillStyle = '#ffffff'; rrect(g, x + 10 * u, (260 + k * 90) * u, cw - 20 * u, 74 * u, 8 * u); g.fill(); g.fillStyle = i === 2 ? K.green : (i === 1 ? K.yellow : K.red); g.fillRect(x + 10 * u, (260 + k * 90) * u, 7 * u, 74 * u); g.fillStyle = '#c9c5bb'; g.fillRect(x + 28 * u, (278 + k * 90) * u, 70 * u, 6 * u); g.fillRect(x + 28 * u, (294 + k * 90) * u, 52 * u, 6 * u); } });
+  arrow(g, 470 * u, 500 * u, 545 * u, 500 * u, K.red, 8 * u, 30 * u);
+  txt(g, 'AD HOC, BEFORE', 70 * u, 835 * u, 24 * u, F.sans, K.grey, 'left', '700'); txt(g, 'ONE TICKETING SYSTEM, IN HUBSPOT', 560 * u, 835 * u, 24 * u, F.sans, K.red, 'left', '700');
+};
+ART.ledger = (g, W, H) => {
+  const u = W / 1000; bg(g, W, H, K.cream); const R = rng(33);
+  txt(g, 'Trip-level', 50 * u, 120 * u, 78 * u, F.serif, K.ink, 'left', 'italic 700');
+  for (let i = 0; i < 90; i++){ const v = (R() * 9000 | 0).toLocaleString('en-GB'); g.save(); g.translate(60 * u + R() * 420 * u, 190 * u + R() * 600 * u); g.rotate((R() - .5) * 0.9); txt(g, '£' + v, 0, 0, (20 + R() * 34) * u, R() > .5 ? F.serif : F.sans, R() > .85 ? K.red : 'rgba(20,21,26,.55)', 'left', R() > .5 ? '700' : '400'); g.restore(); }
+  const x0 = 540 * u, rows = 12, rh = 46 * u, w = 410 * u, cx2 = [x0 + w * 0.5, x0 + w * 0.76, x0 + w - 8 * u]; g.fillStyle = '#ffffff'; g.fillRect(x0 - 14 * u, 175 * u, w + 28 * u, rows * rh + 120 * u);
+  g.fillStyle = K.ink; g.fillRect(x0, 222 * u, w, 3 * u); txt(g, 'TRIP', x0 + 6 * u, 212 * u, 15 * u, F.sans, K.grey, 'left', '700'); ['REVENUE', 'COST', 'MARGIN'].forEach((h, i) => txt(g, h, cx2[i], 212 * u, 15 * u, F.sans, K.grey, 'right', '700'));
+  const R2 = rng(5); for (let r = 0; r < rows; r++){ const y = 254 * u + r * rh, rev = 800 + (R2() * 2400 | 0), cost = rev * (0.55 + R2() * 0.25) | 0; g.fillStyle = r % 2 ? '#f4f1e9' : '#ffffff'; g.fillRect(x0, y, w, rh);
+    txt(g, 'T-' + (1040 + r), x0 + 6 * u, y + 31 * u, 22 * u, F.sans, K.ink, 'left', '500'); [rev, cost, rev - cost].forEach((v, i) => txt(g, '£' + v.toLocaleString('en-GB'), cx2[i], y + 31 * u, 22 * u, F.sans, i === 2 ? K.green : K.ink, 'right', i === 2 ? '700' : '500')); }
+  g.fillStyle = K.ink; g.fillRect(x0, 254 * u + rows * rh, w, 3 * u); txt(g, "ONE SYSTEM, QA'D BY HAND", x0, 254 * u + rows * rh + 48 * u, 22 * u, F.sans, K.red, 'left', '700');
+  txt(g, 'MANUAL, FRAGMENTED, BEFORE', 70 * u, 835 * u, 24 * u, F.sans, K.grey, 'left', '700');
+};
+ART.merge = (g, W, H) => {
+  const u = W / 1000; bg(g, W, H, K.paper);
+  g.globalCompositeOperation = 'multiply';
+  g.fillStyle = '#2446d8'; g.beginPath(); g.arc(W * 0.38, H * 0.46, W * 0.28, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#e5322b'; g.beginPath(); g.arc(W * 0.62, H * 0.46, W * 0.28, 0, Math.PI * 2); g.fill();
+  g.globalCompositeOperation = 'source-over';
+  g.save(); g.beginPath(); g.arc(W * 0.38, H * 0.46, W * 0.28, 0, Math.PI * 2); g.clip(); g.fillStyle = K.yellow; g.beginPath(); g.arc(W * 0.62, H * 0.46, W * 0.28, 0, Math.PI * 2); g.fill(); g.restore();
+  txt(g, 'one operating model', W * 0.5, H * 0.46 + 8 * u, 38 * u, F.serif, K.ink, 'center', 'italic 700');
+  txt(g, 'TEAM A', W * 0.22, H * 0.46, 30 * u, F.sans, '#ffffff', 'center', '700'); txt(g, 'TEAM B', W * 0.78, H * 0.46, 30 * u, F.sans, '#ffffff', 'center', '700');
+  txt(g, 'Two teams,', 50 * u, 90 * u, 70 * u, F.serif, K.ink, 'left', 'italic 700'); txt(g, 'one model', 50 * u, 168 * u, 70 * u, F.serif, K.red, 'left', 'italic 700');
+  txt(g, 'MIGRATED INTO MONDAY.COM AFTER AN ACQUISITION', W / 2, H - 50 * u, 24 * u, F.sans, K.ink, 'center', '700');
+};
+ART.modules = (g, W, H) => {
+  const u = W / 1000; bg(g, W, H, K.yellow);
+  txt(g, 'Ten modules,', 50 * u, 100 * u, 80 * u, F.serif, K.ink, 'left', 'italic 700'); txt(g, 'two assessments', 50 * u, 190 * u, 80 * u, F.serif, K.ink, 'left', 'italic 700');
+  for (let i = 0; i < 10; i++){ const x = 70 * u + (i % 5) * 176 * u, y = 280 * u + Math.floor(i / 5) * 190 * u; g.fillStyle = K.ink; g.fillRect(x, y, 150 * u, 150 * u); txt(g, String(i + 1).padStart(2, '0'), x + 75 * u, y + 98 * u, 64 * u, F.serif, K.yellow, 'center', '700'); }
+  for (let i = 0; i < 2; i++){ const x = 70 * u + i * 440 * u; g.fillStyle = K.red; rrect(g, x, 690 * u, 410 * u, 120 * u, 12 * u); g.fill(); check(g, x + 70 * u, 750 * u, 60 * u, '#ffffff', 10 * u); txt(g, 'ASSESSMENT ' + (i + 1), x + 120 * u, 765 * u, 30 * u, F.sans, '#ffffff', 'left', '700'); }
+  txt(g, 'A CURRICULUM THAT MOVED A CORE PROCESS FROM ON-SITE TO REMOTE', 50 * u, 900 * u, 22 * u, F.sans, K.ink, 'left', '700');
+};
+
+/* ---------- room II: building with AI (dark, digital) ---------- */
+ART.sentiment = (g, W, H) => {   // 1000 x ~611
+  const u = W / 1000; bg(g, W, H, K.navy); const R = rng(3), Hu = H / u;
+  txt(g, 'Sentiment,', 50 * u, 96 * u, 62 * u, F.serif, '#ffffff', 'left', 'italic 700'); txt(g, 'before and after', 50 * u, 164 * u, 62 * u, F.serif, K.lime, 'left', 'italic 700');
+  const x0 = 70 * u, x1 = 950 * u, zero = 372 * u, amp = 118 * u;
+  const curve = t => { const s = 1 / (1 + Math.exp(-(t - 0.5) * 9)); return -0.85 + s * 1.7; };
+  // field of conversations
+  for (let i = 0; i < 520; i++){ const t = R(), y = curve(t) * -amp + (R() - .5) * 100 * u + zero; const x = x0 + t * (x1 - x0); const pos = y < zero; g.fillStyle = pos ? 'rgba(200,255,90,.55)' : 'rgba(229,50,43,.6)'; g.beginPath(); g.arc(x, y, (1.5 + R() * 2.5) * u, 0, Math.PI * 2); g.fill(); }
+  g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 2 * u; g.setLineDash([10 * u, 10 * u]); g.beginPath(); g.moveTo(x0, zero); g.lineTo(x1, zero); g.stroke(); g.setLineDash([]);
+  const gr = g.createLinearGradient(x0, 0, x1, 0); gr.addColorStop(0, K.red); gr.addColorStop(0.5, '#ffffff'); gr.addColorStop(1, K.lime); g.strokeStyle = gr; g.lineWidth = 9 * u; g.lineCap = 'round'; g.beginPath(); for (let i = 0; i <= 120; i++){ const t = i / 120, x = x0 + t * (x1 - x0), y = zero - curve(t) * amp; i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
+  txt(g, 'POSITIVE', x1, zero - amp - 62 * u, 19 * u, F.sans, K.lime, 'right', '700'); txt(g, 'NEGATIVE', x0, zero + amp + 62 * u, 19 * u, F.sans, K.red, 'left', '700');
+  g.strokeStyle = '#ffffff'; g.lineWidth = 3 * u;   txt(g, '+36%', 960 * u, 118 * u, 130 * u, F.serif, K.lime, 'right', '700');
+  txt(g, 'swing, following initial implementation', 960 * u, 162 * u, 21 * u, F.sans, '#e4e8ff', 'right', '500');
+  txt(g, 'CUSTOMER-FACING AI CHATBOT, REFINED WITH CSAT DATA   ·   ILLUSTRATIVE CURVE', 50 * u, (Hu - 26) * u, 19 * u, F.sans, '#8b93c9', 'left', '700');
+};
+function node(g, x, y, w, h, label, sub, col, dashed){ g.fillStyle = 'rgba(255,255,255,.06)'; rrect(g, x - w / 2, y - h / 2, w, h, 18); g.fill(); g.strokeStyle = col; g.lineWidth = 3; if (dashed) g.setLineDash([10, 8]); rrect(g, x - w / 2, y - h / 2, w, h, 18); g.stroke(); g.setLineDash([]); txt(g, label, x, y - (sub ? 2 : -9), 27, F.sans, '#ffffff', 'center', '700'); if (sub) txt(g, sub, x, y + 30, 19, F.sans, col, 'center', '500'); }
+function flow(g, x1, y1, x2, y2, col, n, R){ g.strokeStyle = col; g.lineWidth = 3; g.globalAlpha = .55; const cx = (x1 + x2) / 2; g.beginPath(); g.moveTo(x1, y1); g.bezierCurveTo(cx, y1, cx, y2, x2, y2); g.stroke(); g.globalAlpha = 1; for (let i = 0; i < n; i++){ const t = (i + 0.5) / n, mt = 1 - t; const x = mt * mt * mt * x1 + 3 * mt * mt * t * cx + 3 * mt * t * t * cx + t * t * t * x2, y = mt * mt * mt * y1 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y2; g.fillStyle = col; g.beginPath(); g.arc(x, y, 6, 0, 6.3); g.fill(); } }
+ART.pipeline = (g, W, H) => {   // 1000 x ~590 units
+  const u = W / 1000; bg(g, W, H, K.navy); g.save(); g.scale(u, u); const R = rng(9);
+  txt(g, 'No more', 50, 100, 70, F.serif, '#ffffff', 'left', 'italic 700'); txt(g, 'manual reports', 50, 172, 70, F.serif, K.cyan, 'left', 'italic 700');
+  g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 1; for (let x = 0; x < 1000; x += 40){ g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 700); g.stroke(); } for (let y = 0; y < 700; y += 40){ g.beginPath(); g.moveTo(0, y); g.lineTo(1000, y); g.stroke(); }
+  g.globalAlpha = .45; node(g, 140, 330, 200, 110, 'Spreadsheet', 'manual, error-prone', K.grey, true); g.strokeStyle = K.red; g.lineWidth = 6; g.beginPath(); g.moveTo(60, 270); g.lineTo(220, 390); g.moveTo(220, 270); g.lineTo(60, 390); g.stroke(); g.globalAlpha = 1;
+  node(g, 170, 500, 270, 90, 'Data warehouse', 'source of truth', K.cyan); node(g, 500, 500, 270, 90, 'Proof of concept', 'automated pipeline', K.lime); node(g, 840, 440, 220, 110, 'HubSpot', 'reliable outputs', K.red);
+  flow(g, 305, 500, 365, 500, K.cyan, 3); flow(g, 635, 500, 730, 445, K.lime, 4);
+  for (let i = 0; i < 3; i++){ g.fillStyle = 'rgba(255,255,255,.08)'; rrect(g, 730 + i * 80, 270, 70, 70, 10); g.fill(); g.fillStyle = [K.cyan, K.lime, K.red][i]; g.fillRect(742 + i * 80, 318 - i * 8, 46, 10 + i * 8); }
+  txt(g, 'DATA WAREHOUSE TO HUBSPOT, PROTOTYPED AHEAD OF FORMAL TOOLING', 50, 640, 19, F.sans, '#8b93c9', 'left', '700'); g.restore();
+};
+ART.webhook = (g, W, H) => {   // square, 1000 x 1000
+  const u = W / 1000; bg(g, W, H, '#10142e'); g.save(); g.scale(u, u);
+  txt(g, 'Between two', 50, 100, 74, F.serif, '#ffffff', 'left', 'italic 700'); txt(g, 'platforms', 50, 178, 74, F.serif, K.pink, 'left', 'italic 700');
+  const cx = 500, cy = 560, R1 = 250;
+  g.strokeStyle = 'rgba(255,255,255,.15)'; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, R1 + 70, 0, 6.3); g.stroke();
+  for (let i = 0; i < 5; i++){ const a = -Math.PI / 2 + i * (Math.PI * 2 / 5); const x = cx + Math.cos(a) * (R1 + 70), y = cy + Math.sin(a) * (R1 + 70); g.fillStyle = i < 4 ? K.lime : '#ffffff'; g.beginPath(); g.arc(x, y, 30, 0, 6.3); g.fill(); txt(g, String(i + 1), x, y + 12, 34, F.serif, K.navy, 'center', '700'); }
+  g.fillStyle = K.red; g.beginPath(); g.arc(cx - 150, cy, 125, 0, 6.3); g.fill(); g.fillStyle = K.cyan; g.beginPath(); g.arc(cx + 150, cy, 125, 0, 6.3); g.fill();
+  txt(g, 'HubSpot', cx - 150, cy + 12, 38, F.sans, '#ffffff', 'center', '700'); txt(g, 'eduMe', cx + 150, cy + 12, 38, F.sans, K.navy, 'center', '700');
+  arrow(g, cx - 40, cy - 28, cx + 40, cy - 28, '#ffffff', 7, 24); arrow(g, cx + 40, cy + 28, cx - 40, cy + 28, '#ffffff', 7, 24);
+  txt(g, 'webhook', cx, cy - 56, 22, F.sans, '#ffffff', 'center', '700');
+  txt(g, 'FIVE STAGES, TWO PLATFORMS, ONE JOINED-UP JOURNEY', 500, 940, 20, F.sans, '#8b93c9', 'center', '700'); g.restore();
+};
+ART.backlog = (g, W, H) => {   // 1000 x ~680
+  const u = W / 1000; bg(g, W, H, '#0e1424'); g.save(); g.scale(u, u); const R = rng(17), Hu = H / u;
+  txt(g, 'Resolved', 50, 100, 80, F.serif, '#ffffff', 'left', 'italic 700');
+  const cols = 22, rows = 10, cw = 36, gap = 5, x0 = 50, y0 = 150; let done = 0;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++){ const x = x0 + c * (cw + gap), y = y0 + r * (cw + gap), d = R() > 0.06; if (d) done++; g.fillStyle = d ? K.green : '#2a3350'; rrect(g, x, y, cw, cw, 6); g.fill(); if (d) check(g, x + cw / 2, y + cw / 2, 18, '#ffffff', 3.5); else { g.strokeStyle = K.yellow; g.lineWidth = 3; g.beginPath(); g.arc(x + cw / 2, y + cw / 2, 7, 0, 6.3); g.stroke(); } }
+  txt(g, 'A BACKLOG OF LONG-STANDING OPERATIONAL ISSUES, FIXED DIRECTLY IN HUBSPOT', 50, Hu - 40, 19, F.sans, '#8b93c9', 'left', '700'); g.restore();
+};
+ART.screen = (g, W, H, img, cap) => {   // 16:9 screenshot in a bezel, with the data URI image drawn by the caller
+  g.fillStyle = '#0c0c0f'; g.fillRect(0, 0, W, H);
+  const m = W * 0.012; g.save(); rrect(g, m, m, W - 2 * m, H - 2 * m - H * 0.0, W * 0.012); g.clip(); if (img) g.drawImage(img, m, m, W - 2 * m, H - 2 * m); g.restore();
+};
+
+/* ---------- room III: bringing people along (soft, human) ---------- */
+ART.newsletter = (g, W, H) => {   // 1000 x 1333
+  const u = W / 1000; bg(g, W, H, '#fff4ea'); g.save(); g.scale(u, u);
+  g.fillStyle = K.peach; g.fillRect(0, 0, 1000, 330);
+  txt(g, 'AI, Weekly', 60, 200, 170, F.serif, K.ink, 'left', '700'); g.fillStyle = K.red; g.fillRect(64, 232, 220, 10);
+  spaced(g, 'PLATFORM WALKTHROUGHS + THINGS MADE WITH AI', 64, 290, 23, F.sans, K.ink, 3, '700');
+  g.fillStyle = K.ink; g.fillRect(60, 380, 880, 3);
+  txt(g, 'Platform walkthrough', 60, 450, 38, F.serif, K.ink, 'left', 'italic 700'); txt(g, 'Made with AI', 540, 450, 38, F.serif, K.red, 'left', 'italic 700');
+  // left: a tiny mock of a platform screen
+  g.fillStyle = '#ffffff'; rrect(g, 60, 490, 400, 330, 16); g.fill(); g.strokeStyle = '#e3d6c8'; g.lineWidth = 3; rrect(g, 60, 490, 400, 330, 16); g.stroke();
+  g.fillStyle = K.ink; g.fillRect(60, 490, 400, 44); ['#ff5f56', '#ffbd2e', '#27c93f'].forEach((c, i) => { g.fillStyle = c; g.beginPath(); g.arc(88 + i * 26, 512, 8, 0, 6.3); g.fill(); });
+  for (let i = 0; i < 5; i++){ g.fillStyle = i === 1 ? '#ffd9d5' : '#f4eee6'; rrect(g, 84, 560 + i * 50, 352, 38, 8); g.fill(); g.fillStyle = i === 1 ? K.red : '#c9c1b6'; g.fillRect(100, 574 + i * 50, 90 + i * 22, 10); }
+  // right: generative art
+  const R = rng(41); g.save(); rrect(g, 540, 490, 400, 330, 16); g.clip(); const gr = g.createLinearGradient(540, 490, 940, 820); gr.addColorStop(0, '#ff9a8b'); gr.addColorStop(0.5, '#cbbbe6'); gr.addColorStop(1, '#8fd3f4'); g.fillStyle = gr; g.fillRect(540, 490, 400, 330);
+  for (let i = 0; i < 9; i++){ g.strokeStyle = 'rgba(255,255,255,' + (0.7 - i * 0.06) + ')'; g.lineWidth = 6; g.beginPath(); g.arc(640 + R() * 200, 640 + R() * 120, 30 + i * 24, 0, 6.3); g.stroke(); } g.restore();
+  g.fillStyle = K.ink; g.font = '400 30px ' + F.sans; let y = 900; y = wrap(g, 'Sent every week to keep the whole business engaged through a major platform migration, pairing each walkthrough with something creative made with AI.', 60, y, 880, 44);
+  g.fillStyle = K.ink; g.fillRect(60, y + 16, 880, 3);
+  txt(g, 'STARTED AND RUN WEEKLY', 60, y + 70, 22, F.sans, K.red, 'left', '700'); g.restore();
+};
+ART.training = (g, W, H) => {   // 1000 x 562
+  const u = W / 1000; bg(g, W, H, '#f1ecf9'); g.save(); g.scale(u, u); const Hu = H / u;
+  g.fillStyle = '#ffffff'; g.fillRect(0, 0, 1000, 54); txt(g, 'Scene 4 of 10', 24, 36, 22, F.sans, K.ink, 'left', '700'); g.fillStyle = K.lilac; rrect(g, 830, 12, 150, 32, 16); g.fill(); txt(g, 'Preview', 905, 35, 18, F.sans, K.ink, 'center', '700');
+  // presenter
+  const gr = g.createLinearGradient(40, 90, 440, 400); gr.addColorStop(0, '#cbbbe6'); gr.addColorStop(1, '#8fa8ff'); g.fillStyle = gr; rrect(g, 40, 90, 400, 300, 20); g.fill();
+  g.fillStyle = '#f2c6a0'; g.beginPath(); g.arc(240, 200, 62, 0, 6.3); g.fill(); g.fillStyle = '#2a1d14'; g.beginPath(); g.arc(240, 184, 64, Math.PI, 0); g.fill();
+  g.fillStyle = '#ffffff'; g.beginPath(); g.moveTo(130, 390); g.quadraticCurveTo(140, 290, 240, 280); g.quadraticCurveTo(340, 290, 350, 390); g.fill(); g.fillStyle = K.red; g.fillRect(222, 290, 36, 100);
+  g.fillStyle = 'rgba(0,0,0,.65)'; rrect(g, 70, 340, 340, 36, 8); g.fill(); txt(g, 'Welcome to the next stage.', 240, 365, 22, F.sans, '#ffffff', 'center', '500');
+  // slide
+  g.fillStyle = '#ffffff'; rrect(g, 470, 90, 490, 300, 20); g.fill(); txt(g, 'Stage 3', 500, 190, 92, F.serif, K.ink, 'left', '700');
+  ['Learn', 'Check', 'Practise'].forEach((l, i) => { g.fillStyle = [K.sage, K.yellow, K.peach][i]; rrect(g, 500 + i * 150, 230, 138, 54, 27); g.fill(); txt(g, l, 569 + i * 150, 265, 24, F.sans, K.ink, 'center', '700'); });
+  g.fillStyle = '#e7e2ef'; g.fillRect(500, 320, 400, 10); g.fillRect(500, 346, 290, 10);
+  // timeline
+  for (let i = 0; i < 10; i++){ g.fillStyle = i === 3 ? K.red : '#d9d1e8'; rrect(g, 40 + i * 92, 420, 84, 46, 8); g.fill(); txt(g, String(i + 1), 82 + i * 92, 451, 22, F.sans, i === 3 ? '#ffffff' : K.ink, 'center', '700'); }
+  g.fillStyle = '#d9d1e8'; rrect(g, 40, 480, 920, 18, 9); g.fill(); g.fillStyle = K.red; rrect(g, 40, 480, 380, 18, 9); g.fill();
+  txt(g, 'SCRIPTED AND PRODUCED IN SYNTHESIA AND CANVA', 40, Hu - 24, 19, F.sans, '#5b4f78', 'left', '700'); g.restore();
+};
+ART.mentor = (g, W, H, which, role) => {   // 1000 x 1357
+  const u = W / 1000; const P = [['#ffc9a8', '#2446d8', '#14151a', '#fff4ea'], ['#b9cdb0', '#14151a', '#e5322b', '#f2f6ee'], ['#cbbbe6', '#ffc83d', '#14151a', '#f6f2fb']][which];
+  bg(g, W, H, P[3]); g.save(); g.scale(u, u); g.fillStyle = P[0]; g.fillRect(0, 0, 1000, 1000);
+  const R = rng(60 + which); g.fillStyle = 'rgba(20,21,26,.10)'; for (let y = 20; y < 1000; y += 34) for (let x = (y / 34 % 2) * 17 + 20; x < 1000; x += 34){ g.beginPath(); g.arc(x, y, 5 + (y / 1000) * 5, 0, 6.3); g.fill(); }
+  // abstract figure: shoulders, neck, head, a bold geometric motif
+  g.fillStyle = P[1]; g.beginPath(); g.moveTo(90, 1000); g.quadraticCurveTo(110, 700, 500, 690); g.quadraticCurveTo(890, 700, 910, 1000); g.fill();
+  g.fillStyle = '#e8b891'; g.fillRect(440, 560, 120, 150); g.fillStyle = '#f2c6a0'; g.beginPath(); g.ellipse(500, 440, 170, 215, 0, 0, 6.3); g.fill();
+  g.fillStyle = P[2]; if (which === 0){ g.beginPath(); g.ellipse(500, 360, 185, 150, 0, Math.PI, 0); g.fill(); } else if (which === 1){ g.beginPath(); g.moveTo(330, 440); g.quadraticCurveTo(330, 220, 500, 230); g.quadraticCurveTo(670, 220, 670, 440); g.quadraticCurveTo(640, 330, 500, 330); g.quadraticCurveTo(360, 330, 330, 440); g.fill(); g.fillRect(325, 420, 40, 260); g.fillRect(635, 420, 40, 260); } else { g.beginPath(); g.ellipse(500, 300, 200, 90, 0, 0, 6.3); g.fill(); }
+  g.fillStyle = P[2]; g.beginPath(); g.arc(440, 450, 11, 0, 6.3); g.arc(560, 450, 11, 0, 6.3); g.fill(); g.strokeStyle = P[2]; g.lineWidth = 8; g.lineCap = 'round'; g.beginPath(); g.arc(500, 520, 44, 0.2, Math.PI - 0.2); g.stroke();
+  g.fillStyle = P[2]; g.fillRect(0, 1000, 1000, 357); txt(g, 'MENTOR ' + ['I', 'II', 'III'][which], 60, 1090, 26, F.sans, P[0], 'left', '700'); txt(g, role, 60, 1190, 74, F.serif, '#ffffff', 'left', '700');
+  txt(g, 'Guidance across the years', 60, 1260, 34, F.serif, P[0], 'left', 'italic 400'); g.restore();
+};
+ART.cohort = (g, W, H) => {   // 1000 x 667
+  const u = W / 1000; bg(g, W, H, '#e9efe3'); g.save(); g.scale(u, u);
+  for (const side of [-1, 1]) for (let i = 0; i < 15; i++){ let a = Math.PI / 2 + 0.28 + i * 0.165; if (side > 0) a = Math.PI - a; const r = 292, x = 500 + Math.cos(a) * r, y = 340 + Math.sin(a) * r * 0.95; g.save(); g.translate(x, y); g.rotate(a + Math.PI / 2 + side * 0.35); g.fillStyle = i % 2 ? '#7f9a70' : '#a9c09a'; g.beginPath(); g.ellipse(0, 0, 13, 34, 0, 0, 6.3); g.fill(); g.restore(); }
+  txt(g, 'Selected', 500, 230, 50, F.serif, K.ink, 'center', 'italic 400'); txt(g, 'high-potential', 500, 330, 100, F.serif, K.ink, 'center', '700'); txt(g, 'leadership cohort', 500, 420, 70, F.serif, K.red, 'center', 'italic 700');
+  g.fillStyle = K.ink; g.font = '500 25px ' + F.sans; g.textAlign = 'center'; wrap(g, 'with direct mentorship from C-suite executives', 500, 490, 700, 34); g.restore();
+};
+
+/* ---------- room IV: chronology, toolkit, commission ---------- */
+ART.roomtitle = (g, W, H, d) => {   // wall vinyl on a transparent ground; 1000 x 733
+  const u = W / 1000; g.save(); g.scale(u, u);
+  txt(g, d.num, 10, 190, 230, F.serif, 'rgba(229,50,43,1)', 'left', '700'); txt(g, d.title, 12, 330, 78, F.serif, K.ink, 'left', 'italic 700');
+  g.fillStyle = K.ink; g.fillRect(14, 366, 120, 6); g.font = '400 29px ' + F.sans; g.fillStyle = '#2a2b31'; g.textAlign = 'left'; wrap(g, d.text, 14, 430, 900, 42); g.restore();
+};
+const ROLES = [
+  { years: '2025', range: 'FEB 2025 TO PRESENT', title: 'Program Manager', org: 'Zeelo', col: ['#e5322b', '#7a1410'], ink: '#ffffff',
+    pts: ['Two-person PMO, full autonomy across Operations, Product, Commercial and Data', 'Big Bang CRM migration, AI chatbot, data pipeline', 'Go-to for applied AI, with a weekly newsletter'], tags: ['HubSpot', 'eduMe', 'Monday.com', 'n8n', 'Synthesia', 'Claude'] },
+  { years: '2024', range: 'OCT 2024 TO FEB 2025', title: 'Product Operations Lead', org: 'Zeelo', col: ['#2446d8', '#0f1e6b'], ink: '#ffffff',
+    pts: ['A connective role between Product and Operations', 'Moved trip-level finance into one system', 'Company-wide ticketing, via HubSpot'], tags: ['HubSpot', 'Finance systems', 'QA'] },
+  { years: '2022', range: 'NOV 2022 TO SEP 2024', title: 'Global Operations Project Lead', org: 'Zeelo', col: ['#0f8b8d', '#073f40'], ink: '#ffffff',
+    pts: ['Company-wide efficiency and communication projects', 'Ten-module curriculum, two assessments', '1,500 drivers onto a new login system', 'Three weeks in the US supporting launches'], tags: ['Training design', 'UAT', 'Comms'] },
+  { years: '2021', range: 'OCT 2021 TO OCT 2022', title: 'Operations Specialist', org: 'Zeelo', col: ['#9bb58d', '#3f5236'], ink: '#14151a',
+    pts: ['Invoicing, partner audits and a live portfolio of client programs', 'Built the live global exploration map', 'Supported the first US launch'], tags: ['Invoicing', 'Audits', 'Mapping'] },
+  { years: '2019', range: 'DEC 2019 TO MAR 2021', title: 'Finance, Operations and HR', org: 'Bliss', col: ['#d9cdbb', '#8c7f6a'], ink: '#14151a',
+    pts: ['From a short-term contract to Finance and HR Administrator', 'Ran a sold-out virtual neonatal conference during Covid'], tags: ['Finance', 'HR', 'Events'] }
+];
+ART.role = (g, W, H, i) => {   // 1000 x 1364
+  const d = ROLES[i], u = W / 1000; g.save(); g.scale(u, u); const gr = g.createLinearGradient(0, 0, 1000, 1364); gr.addColorStop(0, d.col[0]); gr.addColorStop(1, d.col[1]); g.fillStyle = gr; g.fillRect(0, 0, 1000, 1364);
+  g.globalAlpha = 0.16; txt(g, d.years, 980, 420, 420, F.serif, d.ink, 'right', '700'); g.globalAlpha = 1;
+  spaced(g, d.range, 60, 110, 24, F.sans, d.ink, 4, '700'); txt(g, d.org.toUpperCase(), 60, 160, 26, F.sans, d.ink, 'left', '500');
+  g.fillStyle = d.ink; g.fillRect(60, 200, 90, 6);
+  g.font = '700 86px ' + F.serif; g.fillStyle = d.ink; g.textAlign = 'left'; let y = 520; const words = d.title.split(' '); let line = ''; for (const w of words){ const t = line ? line + ' ' + w : w; if (g.measureText(t).width > 880 && line){ g.fillText(line, 60, y); line = w; y += 96; } else line = t; } g.fillText(line, 60, y); y += 90;
+  g.font = '400 36px ' + F.sans; for (const p of d.pts){ g.fillStyle = d.ink; g.beginPath(); g.arc(70, y - 12, 7, 0, 6.3); g.fill(); y = wrap(g, p, 96, y, 840, 50) + 22; }
+  let tx = 60, ty = 1270; g.font = '700 26px ' + F.sans; for (const t of d.tags){ const w = g.measureText(t).width + 40; if (tx + w > 940){ tx = 60; ty += 56; } g.strokeStyle = d.ink; g.lineWidth = 2.5; rrect(g, tx, ty - 34, w, 46, 23); g.stroke(); g.fillStyle = d.ink; g.textAlign = 'left'; g.fillText(t, tx + 20, ty - 2); tx += w + 14; }
+  g.restore();
+};
+ART.education = (g, W, H) => {   // 1000 x 750
+  const u = W / 1000; bg(g, W, H, K.cream); g.save(); g.scale(u, u);
+  txt(g, 'Where it started', 50, 110, 74, F.serif, K.ink, 'left', 'italic 700'); g.fillStyle = K.red; g.fillRect(54, 140, 130, 8);
+  txt(g, 'Bournemouth University', 50, 270, 62, F.serif, K.ink, 'left', '700'); txt(g, 'BA Business Studies with Marketing, 2:1', 50, 330, 36, F.sans, '#2a2b31', 'left', '500'); txt(g, '2015 to 2019', 50, 380, 30, F.sans, K.red, 'left', '700');
+  g.fillStyle = K.ink; g.fillRect(50, 440, 900, 3);
+  const items = [['2017 to 2018', 'Marketing and Business Development Intern', 'EarlyWMC Creative Agency'], ['2019', 'Temporary Data Entry', "Charlie Bigham's, FMCG food manufacturer"], ['2019 to 2021', 'Finance, Operations and HR', 'Bliss']];
+  items.forEach((it, i) => { const y = 520 + i * 90; g.fillStyle = K.red; g.beginPath(); g.arc(66, y - 10, 9, 0, 6.3); g.fill(); txt(g, it[0], 100, y - 2, 26, F.sans, K.red, 'left', '700'); txt(g, it[1], 300, y - 2, 28, F.sans, K.ink, 'left', '700'); txt(g, it[2], 300, y + 30, 24, F.sans, '#55575f', 'left', '400'); });
+  g.restore();
+};
+ART.toolkit = (g, W, H) => {   // 1000 x 375 (8 x 3 m)
+  const u = W / 1000; bg(g, W, H, '#f8f6f1'); g.save(); g.scale(u, u);
+  spaced(g, 'MATERIALS', 40, 54, 20, F.sans, K.red, 6, '700');
+  const words = [['HubSpot', 112, K.red], ['Claude', 96, K.ink], ['Monday.com', 70, K.blue], ['eduMe', 64, K.teal], ['n8n', 64, K.ink], ['Zapier', 54, K.red], ['Synthesia', 54, K.blue], ['Canva', 52, K.teal], ['Figma', 52, K.ink], ['Google Workspace', 44, K.red], ['ChatGPT', 44, K.blue]];
+  let x = 40, y = 150, lineH = 0; words.forEach(([w, sz, c]) => { g.font = (['Claude', 'HubSpot'].includes(w) ? 'italic 700 ' : '700 ') + sz + 'px ' + F.serif; const ww = g.measureText(w).width; if (x + ww > 960){ x = 40; y += lineH * 1.0 + 8; lineH = 0; } g.fillStyle = c; g.textAlign = 'left'; g.fillText(w, x, y + (lineH ? 0 : 0)); x += ww + 34; lineH = Math.max(lineH, sz * 0.78); });
+  g.restore();
+};
+ART.contact = (g, W, H) => {   // 1000 x 667
+  const u = W / 1000; bg(g, W, H, '#fbfaf7'); g.save(); g.scale(u, u);
+  txt(g, 'Enquiries', 60, 130, 90, F.serif, K.ink, 'left', 'italic 700'); g.fillStyle = K.red; g.beginPath(); g.arc(880, 120, 44, 0, 6.3); g.fill();
+  txt(g, 'Currently available: AI Chief of Staff', 60, 220, 40, F.serif, K.ink, 'left', '700');
+  g.fillStyle = K.ink; g.fillRect(60, 250, 880, 3);
+  txt(g, 'andrew.latchman@hotmail.com', 60, 340, 44, F.sans, K.ink, 'left', '700'); txt(g, 'linkedin.com/in/andrewlatchman9611', 60, 410, 36, F.sans, K.red, 'left', '700');
+  g.fillStyle = '#4a4b52'; g.font = '400 26px ' + F.sans; g.textAlign = 'left'; wrap(g, 'A red dot means a work has found a home. This one is still available.', 60, 500, 860, 38);
+  g.restore();
+};
+
+const RT = [null,
+  { num: 'I', title: 'Rethinking process', text: 'Journeys, systems and ledgers, redesigned rather than simply tidied. Where the old way was statuses, spreadsheets and workarounds, the new way is one joined-up process.' },
+  { num: 'II', title: 'Building with AI', text: 'Chatbots, pipelines and prototypes: AI built into the work, measured against real outcomes, and kept under human oversight.' },
+  { num: 'III', title: 'Bringing people along', text: 'Technology only works when people want to use it. Newsletters, training and guidance that make change something people join.' },
+  { num: 'IV', title: 'The story so far', text: 'A chronology of roles, the places it started, and the tools I work in. The final work is a commission.' }];
+for (let i = 1; i <= 4; i++) ART['rt' + i] = (g, W, H) => ART.roomtitle(g, W, H, RT[i]);
+['CHIEF OF STAFF', 'PRODUCT DIRECTOR', 'VP OF DATA'].forEach((r, i) => { ART['mentor' + i] = (g, W, H) => ART.mentor(g, W, H, i, r); });
+for (let i = 0; i < 5; i++) ART['role' + i] = (g, W, H) => ART.role(g, W, H, i);
+
+
+/* ---------- hospital edition: new and re-worded artworks (these override the gallery versions) ---------- */
+const HC = { teal: '#0a8f8f', navy: '#0b1f3a', mint: '#d8f0ee', green: '#2fa86a', blue: '#1d5fa8' };
+function cross(g, cx, cy, r, c){ g.fillStyle = c; const a = r * 0.34; g.fillRect(cx - a, cy - r, a * 2, r * 2); g.fillRect(cx - r, cy - a, r * 2, a * 2); }
+function asterisk(g, cx, cy, r, c, lw){ g.strokeStyle = c; g.lineWidth = lw; g.lineCap = 'round'; for (let i = 0; i < 3; i++){ const a = i * Math.PI / 3 + Math.PI / 6; g.beginPath(); g.moveTo(cx - Math.cos(a) * r, cy - Math.sin(a) * r); g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); g.stroke(); } }
+ART.title = (g, W, H) => {   // vinyl lettering on the reception wall (1000 x 450 units, transparent)
+  const u = W / 1000;
+  txt(g, 'ANDREW', 14 * u, 185 * u, 168 * u, F.serif, K.ink, 'left', '700');
+  txt(g, 'LATCHMAN', 14 * u, 345 * u, 168 * u, F.serif, K.ink, 'left', '700');
+  g.fillStyle = HC.teal; g.fillRect(18 * u, 372 * u, 150 * u, 8 * u);
+  spaced(g, 'OPERATOR, BUILDER, CONNECTIVE TISSUE', 18 * u, 428 * u, 20 * u, F.sans, K.ink, 4 * u, '700');
+  txt(g, 'Selected works, 2019 to 2026', 982 * u, 428 * u, 24 * u, F.serif, '#3a3b42', 'right', 'italic 400');
+  txt(g, 'A virtual hospital for the Asterix Health team', 982 * u, 60 * u, 21 * u, F.sans, '#55575f', 'right', '500');
+  cross(g, 930 * u, 150 * u, 38 * u, HC.teal);
+};
+ART.statement = (g, W, H) => {   // 1000 x 1125 units
+  const u = W / 1000; bg(g, W, H, '#fbfdfd');
+  g.fillStyle = HC.teal; g.fillRect(0, 0, W, 16 * u); g.fillRect(60 * u, 70 * u, 8 * u, 120 * u);
+  txt(g, 'Referral summary', 100 * u, 150 * u, 70 * u, F.serif, K.ink, 'left', 'italic 700');
+  g.font = '400 30u'.replace('u', 'px'); g.font = '400 ' + 30 * u + 'px ' + F.sans; g.fillStyle = '#23242a'; let y = 262 * u; const lh = 44 * u, mw = 860 * u;
+  const paras = [
+    'Andrew Latchman is an operator who takes messy, open-ended problems from idea to execution to results, and does not wait to be asked.',
+    'Four years in program delivery at a fast-growing platform, the last two and a half inside a lean two-person PMO, acting as the connective tissue across Operations, Product, Commercial, Finance and Data.',
+    'He builds with Claude, n8n and no-code tools, thinks in checklists and process improvements, and writes for whoever is reading: an executive, a team of engineers, or 1,500 drivers.',
+    'This hospital is laid out as a ward round: strategic initiatives, AI and automation, communication and people, and the story so far.'
+  ];
+  for (const p of paras){ y = wrap(g, p, 70 * u, y, mw, lh) + 20 * u; }
+  txt(g, 'FOR REVIEW BY: THE ASTERIX HEALTH TEAM', 70 * u, H - 40 * u, 20 * u, F.sans, K.grey, 'left', '700');
+};
+const RT2 = [null,
+  { num: 'A', title: 'Strategic initiatives', text: 'Ambiguous, high-stakes projects taken from idea to execution to results, as the connective tissue across Product, Operations, Commercial and Data.' },
+  { num: 'B', title: 'AI, automation and data', text: 'Claude, n8n and no-code workflows that remove friction, with the data to prove they worked.' },
+  { num: 'C', title: 'Communication and people', text: 'Writing, teaching and updates for executives, engineers and frontline teams alike, and growing faster than feels comfortable.' },
+  { num: 'D', title: 'The story so far', text: 'A chronology, the working toolkit, and a commission for Asterix.' }];
+for (let i = 1; i <= 4; i++) ART['rt' + i] = (g, W, H) => { const u = W / 1000; g.save(); g.scale(u, u); txt(g, RT2[i].num, 10, 190, 230, F.serif, HC.teal, 'left', '700'); txt(g, RT2[i].title, 12, 330, 70, F.serif, K.ink, 'left', 'italic 700'); g.fillStyle = K.ink; g.fillRect(14, 366, 120, 6); g.font = '400 29px ' + F.sans; g.fillStyle = '#2a2b31'; g.textAlign = 'left'; wrap(g, RT2[i].text, 14, 430, 900, 42); g.restore(); };
+ART.commission = (g, W, H) => {   // 1000 x 650 units
+  const u = W / 1000; bg(g, W, H, HC.navy); g.save(); g.scale(u, u);
+  txt(g, 'The Commission', 50, 96, 78, F.serif, '#ffffff', 'left', 'italic 700'); txt(g, 'Connective tissue across Product, Engineering, Clinical, Sales and Ops', 52, 142, 26, F.sans, '#7fe0d8', 'left', '500');
+  const cx = 500, cy = 395, nodes = [['Product', -Math.PI / 2, true], ['Sales', -Math.PI / 2 + 1.2566, true], ['Operations', -Math.PI / 2 + 2.5133, true], ['Clinical', -Math.PI / 2 + 3.7699, false], ['Engineering', -Math.PI / 2 + 5.0265, false]];
+  g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, 175, 0, 6.3); g.stroke(); g.setLineDash([8, 10]); g.beginPath(); g.arc(cx, cy, 118, 0, 6.3); g.stroke(); g.setLineDash([]);
+  nodes.forEach(([n, a, solid]) => { const x = cx + Math.cos(a) * 175, y = cy + Math.sin(a) * 175; g.strokeStyle = solid ? '#7fe0d8' : 'rgba(255,255,255,.55)'; g.lineWidth = solid ? 5 : 3; if (!solid) g.setLineDash([8, 7]); g.beginPath(); g.moveTo(cx, cy); g.lineTo(x, y); g.stroke(); g.setLineDash([]); });
+  nodes.forEach(([n, a, solid]) => { const x = cx + Math.cos(a) * 175, y = cy + Math.sin(a) * 175; g.fillStyle = solid ? HC.teal : '#10264a'; g.beginPath(); g.arc(x, y, 58, 0, 6.3); g.fill(); g.strokeStyle = solid ? '#ffffff' : 'rgba(255,255,255,.6)'; g.lineWidth = 3; if (!solid) g.setLineDash([8, 7]); g.beginPath(); g.arc(x, y, 58, 0, 6.3); g.stroke(); g.setLineDash([]); txt(g, n, x, y + 8, 20, F.sans, '#ffffff', 'center', '700'); });
+  g.fillStyle = K.lime; g.beginPath(); g.arc(cx, cy, 70, 0, 6.3); g.fill(); txt(g, 'Andrew', cx, cy + 2, 26, F.sans, HC.navy, 'center', '800'); txt(g, 'owns it end to end', cx, cy + 28, 15, F.sans, HC.navy, 'center', '500');
+  g.fillStyle = HC.teal; g.beginPath(); g.arc(80, 570, 11, 0, 6.3); g.fill(); txt(g, 'Worked alongside, daily', 102, 577, 20, F.sans, '#ffffff', 'left', '500');
+  g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = 3; g.setLineDash([6, 5]); g.beginPath(); g.arc(80, 610, 11, 0, 6.3); g.stroke(); g.setLineDash([]); txt(g, 'Ready to learn', 102, 617, 20, F.sans, '#ffffff', 'left', '500');
+  txt(g, 'REPORTING TO THE CEO', 950, 617, 20, F.sans, K.lime, 'right', '700'); g.restore();
+};
+ART.contact = (g, W, H) => {   // 1000 x 667
+  const u = W / 1000; bg(g, W, H, '#fbfdfd'); g.save(); g.scale(u, u);
+  g.fillStyle = HC.teal; g.fillRect(0, 0, 1000, 14); txt(g, 'Enquiries', 60, 130, 90, F.serif, K.ink, 'left', 'italic 700'); cross(g, 880, 112, 46, HC.green);
+  txt(g, 'Currently available: Founders Associate', 60, 220, 38, F.serif, K.ink, 'left', '700'); g.fillStyle = K.ink; g.fillRect(60, 250, 880, 3);
+  txt(g, 'andrew.latchman@hotmail.com', 60, 340, 44, F.sans, K.ink, 'left', '700'); txt(g, 'linkedin.com/in/andrewlatchman9611', 60, 410, 36, F.sans, HC.teal, 'left', '700');
+  g.fillStyle = '#4a4b52'; g.font = '400 26px ' + F.sans; g.textAlign = 'left'; wrap(g, 'A green cross means a role has been filled. This one is still open.', 60, 500, 860, 38); g.restore();
+};
+ART.hacky = (g, W, H) => {   // 1000 x 770 units: side projects
+  const u = W / 1000; bg(g, W, H, '#f3fbfa'); g.save(); g.scale(u, u); g.fillStyle = HC.teal; g.fillRect(0, 0, 1000, 14);
+  txt(g, 'Side projects', 50, 110, 84, F.serif, K.ink, 'left', 'italic 700'); txt(g, 'Bending reality, for fun', 52, 156, 28, F.serif, '#3a5a58', 'left', 'italic 400');
+  const items = ['A 3D delivery game', 'An endless runner with rep counting and form coaching', 'A 3D arcade maze about the energy grid', 'A Spanish-learning cooking game', 'A 3D gallery of this CV', 'A CRM built from a CV', 'This hospital'];
+  items.forEach((s, i) => { const y = 235 + i * 68; g.fillStyle = i === 6 ? HC.green : HC.teal; g.beginPath(); g.arc(80, y - 10, 24, 0, 6.3); g.fill(); txt(g, String(i + 1), 80, y - 1, 26, F.sans, '#ffffff', 'center', '700'); txt(g, s, 130, y, 32, F.sans, K.ink, 'left', i === 6 ? '800' : '500'); });
+  txt(g, 'BUILT WITH CLAUDE, TESTED WITH BOTS, SHIPPED AS SINGLE WEB PAGES', 50, 735, 19, F.sans, '#3a5a58', 'left', '700'); g.restore();
+};
+ART.billboard = (g, W, H) => {   // Asterix-style wordmark, text only (1000 x ~429 units)
+  const u = W / 1000, Hu = H / u; g.save(); g.scale(u, u); g.fillStyle = HC.navy; g.fillRect(0, 0, 1000, Hu);
+  g.save(); g.beginPath(); g.rect(690, 0, 310, Hu); g.clip(); g.fillStyle = '#e9f6f5'; g.fillRect(690, 0, 310, Hu);
+  g.strokeStyle = HC.teal; g.lineWidth = 6; for (let r = 60; r <= 260; r += 50){ g.beginPath(); g.arc(845, 215, r, 0, 6.3); g.stroke(); }
+  g.strokeStyle = HC.navy; g.lineWidth = 9; g.lineJoin = 'round'; g.beginPath(); g.moveTo(690, 215); g.lineTo(750, 215); g.lineTo(775, 160); g.lineTo(810, 290); g.lineTo(840, 120); g.lineTo(870, 250); g.lineTo(890, 215); g.lineTo(1000, 215); g.stroke();
+  cross(g, 930, 70, 28, HC.green); g.restore();
+  asterisk(g, 92, 128, 52, '#7fe0d8', 16); spaced(g, 'ASTERIX', 170, 158, 90, F.sans, '#ffffff', 7, '800'); spaced(g, 'HEALTH', 174, 218, 46, F.sans, '#7fe0d8', 15, '700');
+  txt(g, 'Fixing the doctor shortage', 46, 288, 40, F.serif, '#e9e5dc', 'left', 'italic 400');
+  g.fillStyle = HC.teal; rrect(g, 40, 330, 440, 62, 31); g.fill(); txt(g, 'NOW HIRING: FOUNDERS ASSOCIATE', 260, 371, 25, F.sans, '#ffffff', 'center', '700');
+  g.restore();
+};
+
+
+const SHOTS = {};
+/* ===================== the hospital: layout and the exhibition ===================== */
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const TOUCH = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+const REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const WALL_H = 3.7, DEPTH = 12, DOOR_W = 3.6, DOOR_H = 2.7, EYE = 1.65;
+const DIV = [12, 28, 44, 60], END = 84, WIN = { x0: 30, x1: 42, y0: 0.55, y1: 3.2 };
+const ROOMS = [
+  { name: 'Reception', x0: 0, x1: 12 }, { name: 'Ward A: Strategic initiatives', x0: 12, x1: 28 }, { name: 'Ward B: AI, automation and data', x0: 28, x1: 44 },
+  { name: 'Ward C: Communication and people', x0: 44, x1: 60 }, { name: 'Ward D: The story so far', x0: 60, x1: 84 }
+];
+const PILLARS = { strat: ['Strategic initiatives', '#0a8f8f'], gtm: ['Commercial and go-to-market', '#1d5fa8'], ops: ['Operations and systems', '#e5322b'], data: ['Data, compliance and scale', '#8a5cf6'], ai: ['AI and automation', '#2fa86a'], comms: ['Communication and people', '#d98a0b'] };
+const SZ0 = { title: [8, 3.6], statement: [3.2, 3.6], num1: [2.4, 3.0], num2: [2.4, 3.0], rt: [3.0, 2.2], stage: [3.0, 2.7], tickets: [3.0, 2.64], ledger: [3.0, 2.7], bigbang: [4.0, 2.4], merge: [2.6, 2.6], modules: [2.4, 2.26],
+  sentiment: [3.6, 2.2], pipeline: [3.4, 2.0], webhook: [2.6, 2.6], backlog: [3.0, 2.0], newsletter: [2.4, 2.45], training: [3.2, 1.8], cohort: [2.4, 1.6], mentor: [1.4, 1.9], hacky: [2.6, 2.0],
+  role: [2.2, 3.0], toolkit: [8, 3], education: [2.6, 1.95], commission: [4.0, 2.6], contact: [2.4, 1.6] };
+const SZ = {}; Object.keys(SZ0).forEach(k => { SZ[k] = [SZ0[k][0] * 0.85, SZ0[k][1] * 0.85]; });
+function mk(art, sz, room, wall, u, o){ return Object.assign({ art, w: SZ[sz][0], h: SZ[sz][1], room, wall, u, frame: 'board', kind: 'work', pillars: [], chips: [] }, o); }
+const WORKS = [
+  mk('title', 'title', 0, 'N', 6, { kind: 'vinyl', frame: 'none', cy: 2.0, title: 'Andrew Latchman' }),
+  mk('statement', 'statement', 0, 'W', 6, { kind: 'card', frame: 'none', cy: 2.0, title: 'Referral summary', sub: 'Introduction', medium: 'Text on wall', text: 'A short summary of the referral: who this is, how the hospital is laid out, and what each ward is about.' }),
+  mk('num1', 'num1', 0, 'E', 2.5, { frame: 'none', ls: -1, title: '1,500+', sub: 'Zeelo, 2022 to 2025', medium: 'CRM, training and login systems', pillars: ['ops', 'strat'], chips: ['1,500+ drivers', 'UK and US', '50+ users migrated'],
+    text: 'One driver base, three projects: a new account-based login (1,500 drivers, 2022 to 2024), a new driver CRM (1,500+ drivers) and a redesigned training model that reached 1,500 drivers across the UK and US.', why: 'Moving a large, busy frontline group onto new systems is the scale-up playbook in miniature.' }),
+  mk('num2', 'num2', 0, 'E', 9.5, { frame: 'none', title: '36%', sub: 'Zeelo, 2025', medium: 'Customer-facing AI chatbot, CSAT analysis', pillars: ['ai', 'data'], chips: ['36% sentiment swing', '4 years delivery', '2.5 years in a two-person PMO'],
+    text: 'A 36% swing from negative to positive sentiment following the initial implementation of a customer-facing AI chatbot, refined continually with CSAT data. Four years of program and project delivery, two and a half of them inside a two-person PMO.', why: 'AI used on a real operational problem, with the result measured rather than assumed.' }),
+  mk('rt1', 'rt', 1, 'E', 2.6, { kind: 'vinyl', frame: 'none', title: 'Ward A: Strategic initiatives', cy: 1.9 }),
+  mk('stage', 'stage', 1, 'N', 15.8, { title: 'From status to stage', sub: 'Zeelo, 2025', medium: 'HubSpot, eduMe, Synthesia, Canva, webhooks', pillars: ['strat', 'ops'], chips: ['1,500 drivers', 'UK and US', 'Stage-based journey'],
+    text: 'Redesigned the driver training operating model for 1,500 drivers across the UK and US, moving from a status-based to a stage-based journey. Personally wrote the scripts and produced the training content in Synthesia and Canva, and helped configure webhook-based workflows linking HubSpot and eduMe.', why: 'It questioned how the work was done rather than speeding up the old way: a systems mindset in practice.' }),
+  mk('tickets', 'tickets', 1, 'N', 20, { title: 'Bug reports, ordered', sub: 'Zeelo, 2024 to 2025', medium: 'HubSpot ticketing', pillars: ['ops'], chips: ['Company-wide', 'Faster resolution'],
+    text: 'Replaced an ad-hoc bug-reporting process with a proper company-wide ticketing system via HubSpot, cutting resolution times on internal product and platform issues.', why: 'Building a repeatable process that lets the company move faster with less friction.' }),
+  mk('ledger', 'ledger', 1, 'N', 24.2, { title: 'Trip-level', sub: 'Zeelo, 2024 to 2025', medium: 'Finance systems, data migration, QA', pillars: ['data', 'ops'], chips: ['One system', 'QA by hand', 'Audit accuracy'],
+    text: 'Designed and delivered the move to a new trip-level financial system, personally migrating and QA-ing all underlying data to cut manual reporting time and keep reporting audit-accurate.', why: 'Balancing speed with safety: careful data handling where accuracy matters.' }),
+  mk('bigbang', 'bigbang', 1, 'S', 16.6, { frame: 'monitor', title: 'Big Bang', sub: 'Zeelo, 2025', medium: 'Monday.com to HubSpot migration', pillars: ['strat', 'ops'], chips: ['50+ users migrated', '1,500+ drivers in the new CRM', '30+ daily users'],
+    text: "Co-led the 'Big Bang' migration from Monday.com to HubSpot: built the new driver CRM (1,500+ drivers), migrated 50+ users and designed the workflows now used daily by 30+ Operations and Service Delivery staff.", why: 'A high-stakes, cross-functional project, taken from idea to execution to results.' }),
+  mk('merge', 'merge', 1, 'S', 21.4, { title: 'Two teams, one model', sub: 'Zeelo, 2025', medium: 'Monday.com, process design', pillars: ['ops', 'comms'], chips: ['Post-acquisition', 'One shared model'],
+    text: 'Migrated operational processes into Monday.com as part of a post-acquisition integration, building a single shared operating model for two newly merged teams.', why: 'Acting as the connective tissue between teams that worked differently.' }),
+  mk('modules', 'modules', 1, 'S', 25, { title: 'Ten modules, two assessments', sub: 'Zeelo, 2022 to 2024', medium: 'Training design', pillars: ['comms'], chips: ['10 modules', '2 assessments', 'On-site to remote'],
+    text: 'Designed and delivered a 10-module training curriculum, with two assessments, to migrate a core operational process from on-site to remote, cutting ramp-up time for new teams.', why: 'Explaining complicated work simply, to the people who have to do it.' }),
+  { id: null, kind: 'sculpture', sculpt: 'vials', room: 1, title: 'One driver, one vial', sub: 'Illustrative data sculpture, 2025', medium: 'Laboratory bench with 1,500 vials', pillars: ['ops'], chips: ['1,500 vials', 'Illustrative data'],
+    text: 'Each of the 1,500 vials stands for one driver in the new CRM. How full each vial is shows an illustrative spread across five training stages, shimmering slowly like a live dashboard. The distribution is illustrative; the number of drivers is not.', why: 'Thinking in scale: whether a process still holds when the volume grows.', cx: 20, cz: 6, view: [20, 1.9, 10.7], look: [20, 1.05, 6] },
+  mk('rt2', 'rt', 2, 'E', 2.6, { kind: 'vinyl', frame: 'none', title: 'Ward B: AI, automation and data', cy: 1.9 }),
+  mk('sentiment', 'sentiment', 2, 'N', 31.8, { frame: 'monitor', title: 'Sentiment, before and after', sub: 'Zeelo, 2025', medium: 'Customer-facing AI chatbot, CSAT', pillars: ['ai', 'data'], chips: ['+36% sentiment swing', 'CSAT-led iteration', 'Illustrative curve'],
+    text: 'Mapped, designed and wrote the copy for a customer-facing AI chatbot, then used CSAT data to refine it continually. The result was a 36% swing from negative to positive sentiment following initial implementation. The curve itself is illustrative.', why: 'Strong Claude and automation skills, backed by a result that was measured.' }),
+  mk('pipeline', 'pipeline', 2, 'N', 36.6, { frame: 'monitor', title: 'No more manual reports', sub: 'Zeelo, 2025', medium: 'Data warehouse, HubSpot, proof of concept', pillars: ['ai', 'data'], chips: ['Automated pipeline', 'Ahead of formal tooling'],
+    text: 'Piloted proof-of-concept integrations between the data warehouse and HubSpot ahead of formal tooling, replacing a manual, error-prone reporting process with an automated pipeline.', why: 'Using data and automation to inform decisions, proven cheaply before any big commitment.' }),
+  mk('webhook', 'webhook', 2, 'N', 41, { frame: 'monitor', title: 'Between two platforms', sub: 'Zeelo, 2025', medium: 'Webhooks, HubSpot, eduMe', pillars: ['ai', 'ops'], chips: ['Webhook workflows', 'Two platforms, one flow'],
+    text: 'Helped configure webhook-based workflows linking HubSpot and eduMe, so the stage-based training journey runs as one joined-up flow across two platforms.', why: 'Hands-on, no-code integration of the kind n8n does: tools talking to each other without waiting for engineering.' }),
+  mk('backlog', 'backlog', 2, 'W', 9.9, { frame: 'monitor', title: 'Resolved', sub: 'Zeelo, 2025', medium: 'HubSpot', pillars: ['ops'], chips: ['Long-standing issues', 'Shipped directly'],
+    text: 'Resolved a backlog of long-standing operational issues that had sat unresolved for months, designing and shipping the fixes directly into HubSpot.', why: 'No task is beneath you: the unglamorous work got done, and made the business faster.' }),
+  { id: null, kind: 'window', room: 2, title: 'The view from here', sub: 'Outside, 2026', medium: 'Window, trees, an ambulance and a very large billboard', pillars: [], chips: ['Asterix Health', 'The real world'],
+    text: 'Out in the real world: a lawn, street trees, a busy road with a passing ambulance and, standing over all of it, a very large billboard. Asterix is where this story goes next. It is the only work in the exhibition that is already about you.', why: 'Asterix is where this goes next.', view: [36, 1.65, 8.4], look: [36, 7, 48] },
+  { id: null, kind: 'sculpture', sculpt: 'vitals', room: 2, title: 'Vital signs', sub: 'Illustrative data sculpture, 2025', medium: 'Patient monitor on a trolley', pillars: ['ai', 'data'], chips: ['36% swing', 'Illustrative trace'],
+    text: 'The 36% sentiment swing as a vital sign. The trace starts flat and low, then settles into a strong, steady rhythm as the chatbot beds in. Illustrative.', why: 'Data that shows something genuinely changed.', cx: 36, cz: 6, view: [32.6, 1.7, 6], look: [36, 1.5, 6] },
+  mk('rt3', 'rt', 3, 'E', 2.6, { kind: 'vinyl', frame: 'none', title: 'Ward C: Communication and people', cy: 1.9 }),
+  mk('newsletter', 'newsletter', 3, 'N', 47.5, { title: 'AI, Weekly', sub: 'Zeelo, 2025', medium: 'Weekly newsletter', pillars: ['comms', 'ai'], chips: ['Weekly', 'Platform walkthroughs', 'Made with AI'],
+    text: 'Started and ran a weekly AI-themed newsletter to keep engagement high through a high-risk migration, pairing platform walkthroughs with original AI-made content.', why: 'Adapting style for the audience, and spreading AI skills across the business.' }),
+  mk('training', 'training', 3, 'N', 52, { title: 'Scene 4 of 10', sub: 'Zeelo, 2025', medium: 'Synthesia, Canva', pillars: ['comms', 'ai'], chips: ['Scripted and produced', 'AI video'],
+    text: 'Personally wrote the scripts and produced the driver training content in Synthesia (AI video) and Canva.', why: 'Writing and producing materials for a large frontline audience, with AI tools.' }),
+  mk('cohort', 'cohort', 3, 'N', 56.6, { frame: 'none', title: 'Leadership cohort', sub: 'Zeelo', medium: 'Selected', pillars: ['comms'], chips: ['C-suite mentorship'],
+    text: 'Selected for the high-potential leadership cohort, with direct mentorship from C-suite executives.', why: 'Growing faster than feels comfortable, with direct exposure to senior leaders.' }),
+  mk('mentor0', 'mentor', 3, 'S', 47.8, { title: 'Mentor I: Chief of Staff', sub: 'Across the years', medium: 'Guidance', pillars: ['comms'], chips: ['Chief of Staff'], text: 'Mentored at various points across four years by the Chief of Staff, the Product Director and the VP of Data, alongside a reporting line into the COO.', why: 'Comfortable learning from, and reporting to, senior people.' }),
+  mk('mentor1', 'mentor', 3, 'S', 50.6, { title: 'Mentor II: Product Director', sub: 'Across the years', medium: 'Guidance', pillars: ['comms'], chips: ['Product Director'], text: 'Mentored at various points across four years by the Chief of Staff, the Product Director and the VP of Data, alongside a reporting line into the COO.', why: 'Comfortable learning from, and reporting to, senior people.' }),
+  mk('mentor2', 'mentor', 3, 'S', 53.4, { title: 'Mentor III: VP of Data', sub: 'Across the years', medium: 'Guidance', pillars: ['comms'], chips: ['VP of Data'], text: 'Mentored at various points across four years by the Chief of Staff, the Product Director and the VP of Data, alongside a reporting line into the COO.', why: 'Comfortable learning from, and reporting to, senior people.' }),
+  mk('hacky', 'hacky', 3, 'W', 9.9, { title: 'Side projects', sub: 'Built with Claude, 2026', medium: 'Browser games, a CRM and a hospital', pillars: ['ai'], chips: ['Built with Claude', 'Tested with bots', 'Shipped as web pages'],
+    text: 'A 3D delivery game, an endless runner with rep counting, a 3D arcade maze, a Spanish-learning cooking game, a 3D gallery of this CV, a CRM built from a CV, and the hospital you are standing in. Each was built with Claude, tested with an automated bot and shipped as a single web page.', why: "You're hacky: here is the latest side project, and the one before it, and the one before that." }),
+  { id: null, kind: 'sculpture', sculpt: 'waiting', room: 3, title: 'Adoption', sub: 'Illustrative sculpture, 2025', medium: 'A waiting room, mid-wave', pillars: ['comms'], chips: ['Illustrative'],
+    text: 'People moving from sceptical to confident with new tools. A wave of adoption passes through the waiting room, turning each person from grey to green in turn. Illustrative.', why: 'Adoption is a people problem, and people respond to patience and warmth.', cx: 52, cz: 6, view: [46.6, 1.9, 6], look: [51.5, 0.8, 6] },
+  mk('rt4', 'rt', 4, 'E', 2.4, { kind: 'vinyl', frame: 'none', title: 'Ward D: The story so far', cy: 1.9 }),
+  mk('role4', 'role', 4, 'N', 64.5, { title: 'Finance, Operations and HR', sub: 'Bliss, Dec 2019 to Mar 2021', medium: 'Finance, HR, events', pillars: ['ops'], chips: ['Finance', 'HR', 'Events'], text: 'Progressed from a short-term contract to Finance and HR Administrator in a charity team, and ran a sold-out virtual neonatal conference during Covid, managing ticketing, speaker scheduling and payments.', why: 'Early responsibility in a small team, and a healthcare-adjacent environment.' }),
+  mk('role3', 'role', 4, 'N', 68.5, { title: 'Operations Specialist', sub: 'Zeelo, Oct 2021 to Oct 2022', medium: 'Operations, mapping', pillars: ['ops', 'gtm'], chips: ['Invoicing', 'Partner audits', 'US launch'], text: 'Ran the daily mechanics of the business: invoicing, partner audits and a live portfolio of client programs. Built the live global exploration map and supported the first US launch for three weeks.', why: 'Detailed admin and customer-facing work, side by side.' }),
+  mk('role2', 'role', 4, 'N', 72.5, { title: 'Global Operations Project Lead', sub: 'Zeelo, Nov 2022 to Sep 2024', medium: 'Projects, training, systems', pillars: ['strat', 'gtm', 'comms'], chips: ['10-module curriculum', '1,500-driver cutover', 'US market entry'], text: 'Led company-wide efficiency and communication projects with no existing template, designed a ten-module curriculum, delivered a clean login cutover for 1,500 drivers, and spent three weeks in the US training suppliers and onboarding partners to support new market launches.', why: 'Ambiguous projects with no playbook, plus real go-to-market exposure.' }),
+  mk('role1', 'role', 4, 'N', 76.5, { title: 'Product Operations Lead', sub: 'Zeelo, Oct 2024 to Feb 2025', medium: 'Product and operations', pillars: ['ops', 'data'], chips: ['Financial system', 'Ticketing'], text: 'Created a connective role between Product and Operations, moved trip-level finance into one system, and replaced ad-hoc bug reporting with a company-wide ticketing system via HubSpot.', why: 'Literally the connective tissue between Product and Operations.' }),
+  mk('role0', 'role', 4, 'N', 80.5, { title: 'Program Manager', sub: 'Zeelo, Feb 2025 to present', medium: 'HubSpot, eduMe, Monday.com, n8n, Synthesia, Claude', pillars: ['strat', 'ai', 'ops'], chips: ['Two-person PMO', 'Full autonomy', 'Go-to for applied AI'], text: 'Operates with full autonomy inside a two-person PMO across Operations, Product, Commercial and Data in the UK and US: the Big Bang CRM migration, the AI chatbot, the data pipeline, the training redesign and a weekly AI newsletter.', why: 'Owning cross-functional initiatives end to end, with a high degree of independence.' }),
+  mk('toolkit', 'toolkit', 4, 'S', 67, { frame: 'none', cy: 2.0, title: 'Materials', sub: 'The toolkit', medium: 'Daily practice', pillars: ['ai'], chips: ['Claude and ChatGPT daily', 'n8n, Zapier', 'Synthesia, Canva, Figma'], text: 'HubSpot, Claude, Monday.com, eduMe, n8n, Zapier, Synthesia, Canva, Figma, Google Workspace and ChatGPT. Claude and ChatGPT are used daily, alongside a wider automation, content and design toolkit.', why: 'Claude and n8n are named in the role: both are part of the daily toolkit.' }),
+  mk('education', 'education', 4, 'S', 75.6, { title: 'Where it started', sub: 'Education and early roles', medium: 'BA Business Studies with Marketing, 2:1', pillars: [], chips: ['Bournemouth University', '2015 to 2019'], text: "A degree in Business Studies with Marketing (2:1), an internship at a creative agency (2017 to 2018), temporary data entry at an FMCG food manufacturer (2019), and then Bliss." }),
+  mk('commission', 'commission', 4, 'E', 7.8, { frame: 'monitor', title: 'The Commission', sub: 'In progress', medium: 'Product, Engineering, Clinical, Sales and Ops', pillars: ['strat', 'ops', 'comms'], chips: ['Connective tissue', 'Reports to the CEO'],
+    text: 'The role works directly with the CEO and across Product, Engineering, Clinical, Sales and Ops. I have worked alongside Product, Commercial and Operations teams daily; Clinical and Engineering are where I would be learning fastest. The commission: own the problems that matter this week, end to end.', why: 'The role in one picture: owning problems end to end, across every function.' }),
+  mk('contact', 'contact', 4, 'S', 80.8, { frame: 'none', cy: 1.9, title: 'Enquiries', sub: 'Currently available', medium: 'Founders Associate', pillars: [], chips: ['andrew.latchman@hotmail.com', 'Built with Claude'], text: 'Currently available for a Founders Associate role. Email andrew.latchman@hotmail.com or find Andrew on LinkedIn (linkedin.com/in/andrewlatchman9611). Behind the scenes: every artwork here is drawn in code, the hospital runs on three.js, and the whole thing was built with Claude and tested with an automated headless renderer.' })
+];
+WORKS.forEach((w, i) => { w.idx = i; w.id = 'AL-' + String(i + 1).padStart(3, '0'); if (w.cy === undefined && w.kind !== 'sculpture' && w.kind !== 'window') w.cy = Math.max(1.6, Math.min(2.05, w.h / 2 + 0.55)); });
+const TOUR = WORKS.filter(w => w.kind !== 'vinyl');
+
+/* ---------- renderer and scene ---------- */
+const canvas = $('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+let PR = Math.min(window.devicePixelRatio || 1, 1.5); renderer.setPixelRatio(PR);
+const up = t => { try { if (renderer.initTexture) renderer.initTexture(t); } catch (e) {} return t; };   // upload to the GPU now, not mid-walk
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#dfe9ea');
+const camera = new THREE.PerspectiveCamera(62, 1, 0.05, 200); camera.rotation.order = 'YXZ';
+function resize(){ const w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+window.addEventListener('resize', resize); resize();
+scene.add(new THREE.HemisphereLight('#f2f9fb', '#d6e1e4', 0.98));
+const sun = new THREE.DirectionalLight('#ffffff', 0.3); sun.position.set(10, 20, 8); scene.add(sun);
+const gallery = new THREE.Group(), dynamic = new THREE.Group(); scene.add(gallery); scene.add(dynamic);
+const hits = [], workOf = new WeakMap();
+const cvs = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+function bx(w, h, d, m, x, y, z, parent){ const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); mesh.position.set(x, y, z); (parent || gallery).add(mesh); return mesh; }
+const lam = (c, o) => new THREE.MeshLambertMaterial(Object.assign({ color: c }, o || {})), bas = (c, o) => new THREE.MeshBasicMaterial(Object.assign({ color: c }, o || {}));
+function cyl(rt, rb, h, m, x, y, z, parent, seg){ const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 12), m); mesh.position.set(x, y, z); (parent || gallery).add(mesh); return mesh; }
+
+/* ---------- textures: clinical walls, vinyl floor, acoustic ceiling ---------- */
+const rnd = (() => { let a = 11; return () => { a = (a * 16807) % 2147483647; return a / 2147483647; }; })();
+const wallTex = (() => { const c = cvs(8, 256), g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#e8f0f0'); gr.addColorStop(0.2, '#f8fcfc'); gr.addColorStop(0.75, '#fbfefe'); gr.addColorStop(1, '#e1ebeb'); g.fillStyle = gr; g.fillRect(0, 0, 8, 256); return up(new THREE.CanvasTexture(c)); })();
+const floorTex = (() => {
+  const c = cvs(1024, 1024), g = c.getContext('2d'); g.fillStyle = '#d6dfe2'; g.fillRect(0, 0, 1024, 1024);
+  for (let i = 0; i < 5200; i++){ g.fillStyle = rnd() > 0.5 ? 'rgba(120,140,150,.22)' : 'rgba(255,255,255,.35)'; g.fillRect(rnd() * 1024, rnd() * 1024, 2 + rnd() * 3, 2 + rnd() * 3); }
+  g.strokeStyle = 'rgba(95,115,125,.28)'; g.lineWidth = 2; for (let i = 0; i <= 1024; i += 256){ g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 1024); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(1024, i); g.stroke(); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; t.repeat.set(84 / 2.4, 12 / 2.4); return up(t);
+})();
+const ceilTex = (() => {
+  const c = cvs(256, 256), g = c.getContext('2d'); g.fillStyle = '#f2f5f5'; g.fillRect(0, 0, 256, 256); for (let i = 0; i < 900; i++){ g.fillStyle = 'rgba(150,165,170,.28)'; g.fillRect(rnd() * 256, rnd() * 256, 2, 2); }
+  g.strokeStyle = '#dfe6e7'; g.lineWidth = 2; g.strokeRect(0, 0, 256, 256); g.beginPath(); g.moveTo(128, 0); g.lineTo(128, 256); g.moveTo(0, 128); g.lineTo(256, 128); g.stroke();
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(84 / 1.2, 12 / 1.2); return up(t);
+})();
+const shadowTex = (() => { const c = cvs(256, 256), g = c.getContext('2d'); for (let i = 0; i < 26; i++){ g.fillStyle = 'rgba(0,0,0,0.022)'; const m = 40 + i * 3; g.fillRect(m, m, 256 - 2 * m, 256 - 2 * m); } return up(new THREE.CanvasTexture(c)); })();
+function labelTex(draw, w, h){ const c = cvs(w, h), g = c.getContext('2d'); draw(g, w, h); const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return up(t); }
+function signTexture(l1, l2, col, arrow){
+  return labelTex((g, W, H) => { g.fillStyle = col; rrect(g, 0, 0, W, H, 26); g.fill(); g.fillStyle = 'rgba(255,255,255,.14)'; rrect(g, 10, 10, W - 20, H - 20, 18); g.fill(); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(112, H / 2, 70, 0, 6.3); g.fill(); cross(g, 112, H / 2, 38, col);
+    txt(g, l1, 214, 118, 84, F.sans, '#ffffff', 'left', '800'); txt(g, l2, 214, 196, 46, F.sans, '#e3f4f3', 'left', '500');
+    if (arrow){ g.strokeStyle = '#ffffff'; g.fillStyle = '#ffffff'; g.lineWidth = 16; g.lineCap = 'round'; g.beginPath(); g.moveTo(W - 90, H - 60); g.lineTo(W - 90, 70); g.stroke(); g.beginPath(); g.moveTo(W - 90, 34); g.lineTo(W - 140, 100); g.lineTo(W - 40, 100); g.closePath(); g.fill(); } }, 1024, 256);
+}
+
+/* ---------- the building: dado walls, steel door frames, tiled ceiling ---------- */
+const wallMat = lam('#eff5f6', { map: wallTex }), dadoMat = lam('#66b5b0'), railMat = lam('#e6f1f0'), steel = lam('#c5cfd3'), dkSteel = lam('#5f6d75'), white = lam('#f4f8f8'), teal = lam('#0a8f8f'), blk = lam('#16181b');
+const ceilMat = bas('#ffffff', { map: ceilTex }), ledMat = bas('#ffffff');
+bx(END, WALL_H, 0.2, wallMat, END / 2, WALL_H / 2, 0);
+bx(WIN.x0, WALL_H, 0.2, wallMat, WIN.x0 / 2, WALL_H / 2, DEPTH); bx(END - WIN.x1, WALL_H, 0.2, wallMat, (WIN.x1 + END) / 2, WALL_H / 2, DEPTH);
+bx(WIN.x1 - WIN.x0, WIN.y0, 0.2, wallMat, (WIN.x0 + WIN.x1) / 2, WIN.y0 / 2, DEPTH); bx(WIN.x1 - WIN.x0, WALL_H - WIN.y1, 0.2, wallMat, (WIN.x0 + WIN.x1) / 2, WIN.y1 + (WALL_H - WIN.y1) / 2, DEPTH);
+bx(0.2, WALL_H, DEPTH, wallMat, 0, WALL_H / 2, DEPTH / 2); bx(0.2, WALL_H, DEPTH, wallMat, END, WALL_H / 2, DEPTH / 2);
+const SIDE = (DEPTH - DOOR_W) / 2;
+DIV.forEach(x => {
+  bx(0.2, WALL_H, SIDE, wallMat, x, WALL_H / 2, SIDE / 2); bx(0.2, WALL_H, SIDE, wallMat, x, WALL_H / 2, DEPTH - SIDE / 2);
+  bx(0.2, WALL_H - DOOR_H, DOOR_W, wallMat, x, DOOR_H + (WALL_H - DOOR_H) / 2, DEPTH / 2);
+  for (const s of [-1, 1]) bx(0.26, DOOR_H, 0.07, steel, x, DOOR_H / 2, DEPTH / 2 + s * (DOOR_W / 2 + 0.03));
+  bx(0.26, 0.09, DOOR_W + 0.14, steel, x, DOOR_H + 0.04, DEPTH / 2); bx(0.1, 0.08, 0.4, dkSteel, x - 0.07, DOOR_H + 0.16, DEPTH / 2);   // frame, head and the door sensor
+});
+// teal dado and a pale rail along every wall face, so it reads as a ward
+const dd = (len, h, d, cx, cy, cz, rot) => { const m = bx(len, h, d, dadoMat, cx, cy, cz); const r = bx(len, 0.05, d + 0.025, railMat, cx, cy + h / 2 + 0.012, cz); if (rot){ m.rotation.y = r.rotation.y = rot; } };
+dd(END - 0.2, 1.15, 0.006, END / 2, 0.575, 0.103); dd(WIN.x0 - 0.1, 1.15, 0.006, (0.1 + WIN.x0) / 2, 0.575, DEPTH - 0.103); dd(END - 0.1 - WIN.x1, 1.15, 0.006, (WIN.x1 + END - 0.1) / 2, 0.575, DEPTH - 0.103);
+bx(0.006, 1.15, DEPTH - 0.2, dadoMat, 0.103, 0.575, DEPTH / 2); bx(0.006, 1.15, DEPTH - 0.2, dadoMat, END - 0.103, 0.575, DEPTH / 2);
+DIV.forEach(x => { for (const s of [-1, 1]){ bx(0.006, 1.15, SIDE - 0.1, dadoMat, x + s * 0.103, 0.575, (SIDE + 0.1) / 2); bx(0.006, 1.15, SIDE - 0.1, dadoMat, x + s * 0.103, 0.575, DEPTH - (SIDE + 0.1) / 2); } });
+// skirting
+bx(END, 0.1, 0.03, dkSteel, END / 2, 0.05, 0.115); bx(WIN.x0, 0.1, 0.03, dkSteel, WIN.x0 / 2, 0.05, DEPTH - 0.115); bx(END - WIN.x1, 0.1, 0.03, dkSteel, (WIN.x1 + END) / 2, 0.05, DEPTH - 0.115);
+// the big window: slim white frame, mullions and a sill
+{ const cx = (WIN.x0 + WIN.x1) / 2, ww = WIN.x1 - WIN.x0, hh = WIN.y1 - WIN.y0, cy = (WIN.y0 + WIN.y1) / 2;
+  bx(ww + 0.1, 0.07, 0.3, steel, cx, WIN.y1 - 0.02, DEPTH); bx(ww + 0.1, 0.07, 0.3, steel, cx, WIN.y0 + 0.02, DEPTH); for (const x of [WIN.x0, WIN.x0 + 3, WIN.x0 + 6, WIN.x0 + 9, WIN.x1]) bx(0.07, hh, 0.3, steel, x, cy, DEPTH);
+  bx(ww + 0.3, 0.05, 0.42, lam('#ffffff'), cx, WIN.y0 + 0.025, DEPTH - 0.14); }
+// ceiling tiles and recessed LED panels
+const ceil = new THREE.Mesh(new THREE.PlaneGeometry(END, DEPTH), ceilMat); ceil.rotation.x = Math.PI / 2; ceil.position.set(END / 2, WALL_H, DEPTH / 2); gallery.add(ceil);
+ROOMS.forEach(r => { for (const z of [3.2, 8.8]) for (let x = r.x0 + 2.4; x < r.x1 - 1.2; x += 3.6){ bx(1.2, 0.03, 0.6, ledMat, x, WALL_H - 0.02, z); bx(1.28, 0.02, 0.68, steel, x, WALL_H - 0.012, z); } });
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(END, DEPTH), new THREE.MeshLambertMaterial({ map: floorTex, color: '#d2dcdf', transparent: true, opacity: 0.94 })); floor.rotation.x = -Math.PI / 2; floor.position.set(END / 2, 0, DEPTH / 2); floor.renderOrder = 2; scene.add(floor);
+// the coloured guidance lines that lead you through the wards
+[[5.5, '#2b7fd8'], [6.5, '#2fa86a']].forEach(([z, c]) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(END - 1.2, 0.14), bas(c)); m.rotation.x = -Math.PI / 2; m.position.set(END / 2, 0.006, z); gallery.add(m); });
+
+/* ---------- ward fittings: furniture, signs, wall items ---------- */
+function hang(x, y, z, yaw, l1, l2, col, arrow, w2, h2){ const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = yaw; gallery.add(g); const t = new THREE.Mesh(new THREE.PlaneGeometry(w2 || 2.4, h2 || 0.6), bas('#ffffff', { map: signTexture(l1, l2, col, arrow) })); g.add(t); for (const s of [-1, 1]) cyl(0.012, 0.012, WALL_H - y - 0.3, dkSteel, s * ((w2 || 2.4) / 2 - 0.2), (WALL_H - y) / 2 - 0.1, 0, g, 6); return g; }
+function reception(x, z){
+  const g = new THREE.Group(); g.position.set(x, 0, z); gallery.add(g);
+  bx(3.6, 0.95, 0.7, white, 0, 0.475, 0, g); bx(3.6, 0.8, 0.02, teal, 0, 0.5, 0.36, g); bx(3.8, 0.05, 0.85, lam('#d9c4a1'), 0, 0.975, 0, g); bx(3.7, 0.06, 0.3, white, 0, 1.28, 0.22, g); bx(3.6, 0.28, 0.04, white, 0, 1.14, 0.08, g);
+  const sg = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.4), bas('#fff', { map: labelTex((q, W, H) => { q.fillStyle = '#0a8f8f'; q.fillRect(0, 0, W, H); txt(q, 'RECEPTION', W / 2, H / 2 + 6, 68, F.sans, '#ffffff', 'center', '800'); }, 512, 128) })); sg.position.set(0, 0.55, 0.372); g.add(sg);
+  bx(0.46, 0.28, 0.03, blk, -1.45, 1.25, -0.12, g); bx(0.06, 0.12, 0.05, dkSteel, -1.45, 1.08, -0.12, g); bx(0.4, 0.015, 0.13, dkSteel, -1.45, 1.01, 0.05, g); cyl(0.05, 0.06, 0.03, lam('#d8b24a'), 1.2, 1.0, 0.1, g); bx(0.12, 0.2, 0.06, white, 1.6, 1.1, 0.08, g); addBoxCollider(x, z, 3.8, 0.9);
+}
+function chair(x, z, yaw, col){ const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw || 0; gallery.add(g); const m = lam(col || '#2f78c4'); bx(0.46, 0.05, 0.46, m, 0, 0.46, 0, g); bx(0.46, 0.4, 0.05, m, 0, 0.72, -0.21, g); for (const sx of [-1, 1]) for (const sz of [-1, 1]) cyl(0.014, 0.014, 0.44, dkSteel, sx * 0.2, 0.22, sz * 0.2, g, 6); return g; }
+function bed(x, z, yaw, curtains){
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw || 0; gallery.add(g);
+  bx(0.95, 0.12, 2.0, steel, 0, 0.42, 0, g); bx(0.9, 0.16, 1.92, lam('#e3f1f3'), 0, 0.56, 0, g); bx(0.5, 0.1, 0.3, white, 0, 0.7, -0.7, g); bx(0.9, 0.06, 1.0, lam('#5cb5b0'), 0, 0.67, 0.45, g);
+  bx(0.97, 0.55, 0.05, steel, 0, 0.75, -1.02, g); bx(0.97, 0.4, 0.05, steel, 0, 0.7, 1.02, g); for (const s of [-1, 1]) bx(0.03, 0.04, 1.2, dkSteel, s * 0.47, 0.85, 0.1, g);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]){ const w = cyl(0.05, 0.05, 0.05, blk, sx * 0.4, 0.05, sz * 0.9, g, 10); w.rotation.z = Math.PI / 2; }
+  cyl(0.012, 0.012, 1.95, dkSteel, 0.62, 0.98, -0.8, g, 6); cyl(0.2, 0.22, 0.03, dkSteel, 0.62, 0.03, -0.8, g, 12); bx(0.14, 0.22, 0.04, lam('#dff3f8', { transparent: true, opacity: 0.85 }), 0.62, 1.82, -0.8, g);   // drip stand and bag
+  bx(0.45, 0.75, 0.45, white, -0.72, 0.4, -0.45, g); bx(0.45, 0.03, 0.46, steel, -0.72, 0.78, -0.45, g);                                                                                        // bedside cabinet
+  bx(0.8, 0.04, 0.4, white, 0, 0.98, 0.55, g); cyl(0.02, 0.02, 0.9, dkSteel, 0, 0.5, 0.75, g, 6);                                                                                              // over-bed table
+  if (curtains){ const cm = lam('#9bd3cf', { transparent: true, opacity: 0.82, side: THREE.DoubleSide }); [[-1.2, 0, 0, 2.2], [1.2, 0, 0, 2.2], [0, -1.2, Math.PI / 2, 2.4]].forEach(([cx2, cz2, ry, len]) => { const p = new THREE.Mesh(new THREE.PlaneGeometry(len, 1.55), cm); p.position.set(cx2, 1.5, cz2); p.rotation.y = ry || Math.PI / 2; g.add(p); const rail = bx(len, 0.02, 0.02, steel, cx2, 2.32, cz2, g); rail.rotation.y = ry || Math.PI / 2; }); }
+  addBoxCollider(x, z, Math.abs(Math.cos(yaw || 0)) > 0.5 ? 1.4 : 2.4, Math.abs(Math.cos(yaw || 0)) > 0.5 ? 2.4 : 1.4); return g;
+}
+function trolley(x, z, yaw){ const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw || 0; gallery.add(g); bx(0.6, 0.85, 0.45, white, 0, 0.55, 0, g); ['#2fa86a', '#1d5fa8', '#e5322b', '#d9a40b'].forEach((c, i) => bx(0.5, 0.15, 0.02, lam(c), 0, 0.88 - i * 0.18, 0.235, g)); bx(0.66, 0.03, 0.5, dkSteel, 0, 1.0, 0, g); for (const sx of [-1, 1]) for (const sz of [-1, 1]) cyl(0.04, 0.04, 0.06, blk, sx * 0.26, 0.04, sz * 0.18, g, 8); bx(0.12, 0.1, 0.1, lam('#e9f6f5'), -0.15, 1.07, 0, g); addBoxCollider(x, z, 0.8, 0.7); return g; }
+function wheelchair(x, z, yaw){ const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw || 0; gallery.add(g); bx(0.46, 0.04, 0.44, lam('#2a3036'), 0, 0.5, 0, g); bx(0.46, 0.42, 0.03, lam('#2a3036'), 0, 0.72, -0.21, g); for (const s of [-1, 1]){ const w = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.014, 6, 24), dkSteel); w.position.set(s * 0.27, 0.32, -0.08); w.rotation.y = Math.PI / 2; g.add(w); cyl(0.03, 0.03, 0.03, blk, s * 0.24, 0.05, 0.3, g, 8).rotation.z = Math.PI / 2; bx(0.02, 0.02, 0.4, dkSteel, s * 0.24, 0.62, 0, g); bx(0.12, 0.02, 0.04, blk, s * 0.24, 0.64, -0.27, g); } addBoxCollider(x, z, 0.8, 0.8); return g; }
+function wallItem(x, y, z, yaw, w, h, d, col, label){ const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = yaw; gallery.add(g); bx(w, h, d, lam(col), 0, 0, d / 2, g); if (label){ const p = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.82, h * 0.5), bas('#fff', { map: label })); p.position.set(0, h * 0.12, d + 0.002); g.add(p); } return g; }
+const crossLabel = (bgc, fg) => labelTex((g, W, H) => { g.fillStyle = bgc; g.fillRect(0, 0, W, H); cross(g, W / 2, H / 2, 70, fg); }, 256, 256);
+const wordLabel = (word, bgc, fg) => labelTex((g, W, H) => { g.fillStyle = bgc; g.fillRect(0, 0, W, H); txt(g, word, W / 2, H / 2 + 14, 64, F.sans, fg, 'center', '800'); }, 256, 160);
+function sanitiser(x, z, yaw){ const g = wallItem(x, 1.25, z, yaw, 0.1, 0.3, 0.1, '#f4f8f8'); bx(0.04, 0.05, 0.07, teal, 0, -0.1, 0.12, g); }
+function extinguisher(x, z, yaw){ const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw; gallery.add(g); cyl(0.075, 0.075, 0.5, lam('#d8281f'), 0, 0.65, 0.09, g, 12); cyl(0.03, 0.03, 0.08, blk, 0, 0.94, 0.09, g, 8); bx(0.3, 0.3, 0.01, lam('#d8281f'), 0, 1.35, 0.01, g); bx(0.04, 0.2, 0.012, lam('#ffffff'), 0, 1.35, 0.016, g); }
+function clock(x, y, z, yaw){ const c = labelTex((g, W, H) => { g.fillStyle = '#ffffff'; g.beginPath(); g.arc(128, 128, 124, 0, 6.3); g.fill(); g.strokeStyle = '#16181b'; g.lineWidth = 8; g.beginPath(); g.arc(128, 128, 120, 0, 6.3); g.stroke(); for (let i = 0; i < 12; i++){ const a = i * Math.PI / 6; g.lineWidth = i % 3 ? 3 : 6; g.beginPath(); g.moveTo(128 + Math.sin(a) * 100, 128 - Math.cos(a) * 100); g.lineTo(128 + Math.sin(a) * 112, 128 - Math.cos(a) * 112); g.stroke(); } g.lineWidth = 8; g.lineCap = 'round'; g.beginPath(); g.moveTo(128, 128); g.lineTo(128 + Math.sin(-1.05) * 56, 128 - Math.cos(-1.05) * 56); g.stroke(); g.lineWidth = 5; g.beginPath(); g.moveTo(128, 128); g.lineTo(128 + Math.sin(1.05) * 86, 128 - Math.cos(1.05) * 86); g.stroke(); }, 256, 256); const m = new THREE.Mesh(new THREE.CircleGeometry(0.28, 28), bas('#fff', { map: c })); m.position.set(x, y, z); m.rotation.y = yaw; gallery.add(m); }
+function vending(x, z){ const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = Math.PI; gallery.add(g); bx(0.95, 1.9, 0.8, lam('#2a3a4a'), 0, 0.95, 0, g); const f = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 1.4), bas('#fff', { map: labelTex((q, W, H) => { q.fillStyle = '#e9f2f4'; q.fillRect(0, 0, W, H); const cs = ['#e5322b', '#ff9f1c', '#2fa86a', '#2f78c4', '#b5179e', '#f6cd7f']; for (let r = 0; r < 6; r++) for (let c = 0; c < 4; c++){ q.fillStyle = cs[(r * 3 + c) % 6]; q.fillRect(14 + c * 62, 18 + r * 80, 48, 62); } }, 256, 512) })); f.position.set(-0.07, 1.05, -0.401); f.rotation.y = Math.PI; g.add(f); bx(0.2, 1.4, 0.02, lam('#16181b'), 0.34, 1.05, -0.402, g); addBoxCollider(x, z, 1.1, 0.9); }
+function cooler(x, z){ const g = new THREE.Group(); g.position.set(x, 0, z); gallery.add(g); bx(0.35, 1.0, 0.35, white, 0, 0.5, 0, g); cyl(0.14, 0.14, 0.4, lam('#9fd2e8', { transparent: true, opacity: 0.7 }), 0, 1.25, 0, g, 14); bx(0.08, 0.04, 0.05, lam('#2f78c4'), -0.05, 0.85, -0.19, g); addBoxCollider(x, z, 0.5, 0.5); }
+function plant(x, z){ const g = new THREE.Group(); g.position.set(x, 0, z); gallery.add(g); cyl(0.32, 0.25, 0.6, lam('#efece5'), 0, 0.3, 0, g, 14); const leaf = lam('#3f8a52'); for (let i = 0; i < 9; i++){ const l = new THREE.Mesh(new THREE.ConeGeometry(0.13, 1.1 + (i % 3) * 0.3, 6), leaf); const a = i * 0.7; l.position.set(Math.cos(a) * 0.14, 1.15 + (i % 3) * 0.1, Math.sin(a) * 0.14); l.rotation.set(Math.sin(a) * 0.5, 0, -Math.cos(a) * 0.5); g.add(l); } }
+function buildHospital(){
+  // reception: the front desk, a waiting row, vending and water, fire and first aid, a clock and the exit
+  reception(6, 7.5); hang(6, 3.05, 7.5, 0, 'RECEPTION', 'Start here', '#0a8f8f', false, 2.6, 0.65);
+  for (let i = 0; i < 4; i++) chair(1.6 + i * 0.55, 11.3, Math.PI);
+  vending(10.2, 11.4); cooler(8.7, 11.6); wheelchair(1.5, 2.6, 0.6); wheelchair(1.5, 3.4, 0.5);
+  wallItem(0.11, 1.5, 1.6, Math.PI / 2, 0.42, 0.34, 0.12, '#2fa86a', crossLabel('#2fa86a', '#ffffff')); wallItem(0.11, 1.4, 10.4, Math.PI / 2, 0.36, 0.3, 0.12, '#f4f8f8', wordLabel('AED', '#2fa86a', '#ffffff'));
+  clock(6, 2.85, DEPTH - 0.12, Math.PI);
+  // doorway signs, hand gel on every doorway, and fire extinguishers
+  const names = [['WARD A', 'Strategic initiatives', 'Reception'], ['WARD B', 'AI, automation and data', 'Ward A'], ['WARD C', 'Communication and people', 'Ward B'], ['WARD D', 'The story so far', 'Ward C']];
+  DIV.forEach((d, i) => { hang(d - 1.1, 3.0, 6, -Math.PI / 2, names[i][0], names[i][1], '#1d5fa8', true, 2.7, 0.68); hang(d - 1.08, 3.0, 6, Math.PI / 2, 'BACK', 'To ' + names[i][2], '#5f7f94', false, 2.0, 0.5); for (const s of [-1, 1]) for (const z of [4.05, 7.95]) sanitiser(d + s * 0.115, z, s > 0 ? Math.PI / 2 : -Math.PI / 2); });
+  [28, 60].forEach(d => extinguisher(d - 0.115, 0.6, -Math.PI / 2));
+  // wards: trolleys, wheelchairs and two beds with curtains in the last ward
+  trolley(27.2, 11.2, 0.4); trolley(28.9, 1.3, -0.3); wheelchair(83, 11.1, 2.6);
+  bed(70.6, 7.3, 0, false); bed(73.9, 7.3, 0, false);
+  { const cm = lam('#9bd3cf', { transparent: true, opacity: 0.8, side: THREE.DoubleSide }), p = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.9), cm); p.position.set(72.25, 1.35, 6.65); p.rotation.y = Math.PI / 2; gallery.add(p); bx(0.02, 0.02, 1.6, steel, 72.25, 2.32, 6.65); bx(0.02, 0.02, 3.6, steel, 72.25, 2.32, 6.1).rotation.y = Math.PI / 2; }
+  cooler(58.9, 11.5);
+  plant(1.1, 10.8); plant(82.8, 10.9); plant(45.1, 1.1); plant(13.1, 10.9); plant(43.1, 11.0);
+  const ex = bas('#2fa86a'); const sg = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.24), bas('#fff', { map: labelTex((q, W, H) => { q.fillStyle = '#1f9d55'; q.fillRect(0, 0, W, H); txt(q, 'EXIT', W / 2 + 40, H / 2 + 22, 78, F.sans, '#ffffff', 'center', '800'); q.fillStyle = '#fff'; q.beginPath(); q.arc(60, 50, 12, 0, 6.3); q.fill(); q.fillRect(54, 64, 12, 36); }, 256, 100) })); sg.position.set(END - 0.115, 3.3, 11.1); sg.rotation.y = -Math.PI / 2; gallery.add(sg);
+}
+
+/* ---------- placing the works ---------- */
+function wallPose(w){
+  const r = ROOMS[w.room], e = 0.105, cy = w.cy;
+  if (w.wall === 'N') return { pos: new THREE.Vector3(w.u, cy, e), yaw: 0, n: new THREE.Vector3(0, 0, 1), right: new THREE.Vector3(1, 0, 0) };
+  if (w.wall === 'S') return { pos: new THREE.Vector3(w.u, cy, DEPTH - e), yaw: Math.PI, n: new THREE.Vector3(0, 0, -1), right: new THREE.Vector3(-1, 0, 0) };
+  if (w.wall === 'W') return { pos: new THREE.Vector3(r.x0 + e, cy, w.u), yaw: Math.PI / 2, n: new THREE.Vector3(1, 0, 0), right: new THREE.Vector3(0, 0, -1) };
+  return { pos: new THREE.Vector3(r.x1 - e, cy, w.u), yaw: -Math.PI / 2, n: new THREE.Vector3(-1, 0, 0), right: new THREE.Vector3(0, 0, 1) };
+}
+function labelTexture(w){   // a small clinical case-note card
+  const c = cvs(512, 400), g = c.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 512, 400); g.strokeStyle = 'rgba(20,60,60,.3)'; g.lineWidth = 3; g.strokeRect(5, 5, 502, 390);
+  g.fillStyle = HC.teal; g.fillRect(5, 5, 502, 70); cross(g, 48, 40, 18, '#ffffff'); g.fillStyle = '#ffffff'; g.font = '800 24px ' + F.sans; g.textAlign = 'left'; g.fillText('CASE NOTE', 82, 48); g.textAlign = 'right'; g.fillText(w.id, 488, 48);
+  g.textAlign = 'left'; g.fillStyle = K.ink; g.font = '700 40px ' + F.serif; let y = 128; const words = w.title.split(' '); let line = ''; for (const wd of words){ const t = line ? line + ' ' + wd : wd; if (g.measureText(t).width > 456 && line){ g.fillText(line, 28, y); line = wd; y += 46; } else line = t; } g.fillText(line, 28, y);
+  g.fillStyle = '#55575f'; g.font = '500 24px ' + F.sans; y += 44; g.fillText(w.sub || '', 28, y); g.font = 'italic 400 24px ' + F.serif; y += 34; if (w.medium) g.fillText(w.medium.length > 40 ? w.medium.slice(0, 38) + '...' : w.medium, 28, y);
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return up(t);
+}
+function placeWork(w){
+  const pose = wallPose(w); w.p = pose;
+  const g = new THREE.Group(); g.position.copy(pose.pos); g.rotation.y = pose.yaw; gallery.add(g);
+  const mon = w.frame === 'monitor', framed = w.frame === 'board' || mon;
+  const fr = mon ? 0.03 : 0.035, mt = (!mon && framed) ? (w.w < 2.4 ? 0.06 : 0.045) : 0, depth = mon ? 0.07 : 0.05;
+  const sh = new THREE.Mesh(new THREE.PlaneGeometry(w.w + 0.5 + 2 * mt, w.h + 0.5 + 2 * mt), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 0.8 })); sh.position.set(0.03, -0.05, 0.004); sh.renderOrder = 1; if (w.kind !== 'vinyl') g.add(sh);
+  let z = 0.012;
+  if (framed){ bx(w.w + 2 * (fr + mt), w.h + 2 * (fr + mt), depth, mon ? lam('#15181c') : steel, 0, 0, depth / 2, g); z = depth + 0.002;
+    if (mt > 0){ const m = new THREE.Mesh(new THREE.PlaneGeometry(w.w + 2 * mt, w.h + 2 * mt), new THREE.MeshBasicMaterial({ color: '#f7fafa' })); m.position.z = z; g.add(m); z += 0.002; }
+    if (mon) bx(0.05, 0.014, 0.012, bas('#33dd88'), w.w / 2 - 0.12, -(w.h / 2 + fr) + 0.016, depth + 0.002, g); else { for (const sx of [-1, 1]) for (const sy of [-1, 1]) bx(0.07, 0.07, 0.012, teal, sx * (w.w / 2 + mt), sy * (w.h / 2 + mt), depth + 0.002, g); } }
+  const art = new THREE.Mesh(new THREE.PlaneGeometry(w.w, w.h), new THREE.MeshBasicMaterial({ map: w.tex, transparent: !framed, depthWrite: framed }));
+  art.position.z = z; art.renderOrder = framed ? 0 : 3; g.add(art); w.art3 = art; workOf.set(art, w); if (w.kind !== 'vinyl') hits.push(art);
+  if (w.kind !== 'vinyl' && w.kind !== 'card'){ const ls = w.ls || 1, lab = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.234), new THREE.MeshBasicMaterial({ map: labelTexture(w) })); lab.position.set(ls * (w.w / 2 + fr + mt + 0.34), 1.3 - w.cy, 0.012); g.add(lab); workOf.set(lab, w); hits.push(lab); }
+}
+function placeSculptureBase(w){
+  const lab = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.39), new THREE.MeshBasicMaterial({ map: labelTexture(w) })); workOf.set(lab, w); hits.push(lab); gallery.add(lab); w.plaque = lab; w.art3 = lab;
+  return lab;
+}
+
+/* ---------- sculptures: a lab bench, a patient monitor, a waiting room ---------- */
+const sculptures = [], colliders = []; let mirrorObj = null;
+const LOW = !!((navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || TOUCH);
+let LITE = LOW;
+function setLite(on, why){ LITE = on; if (mirrorObj) mirrorObj.visible = !on; PR = on ? 1 : Math.min(window.devicePixelRatio || 1, 1.5); renderer.setPixelRatio(PR); resize(); const b = $('bLite'); if (b) b.textContent = on ? 'Full quality' : 'Smooth mode'; if (why){ const h = $('hint'); h.hidden = false; h.style.opacity = 1; h.textContent = why; setTimeout(() => { h.hidden = true; }, 6000); } }
+function addBoxCollider(cx, cz, w, d){ colliders.push({ x0: cx - w / 2, x1: cx + w / 2, z0: cz - d / 2, z1: cz + d / 2 }); }
+function noise2(x, y, seed){ const gx = Math.floor(x), gy = Math.floor(y), fx = x - gx, fy = y - gy; const h = (a, b) => { let n = Math.sin(a * 127.1 + b * 311.7 + seed * 74.7) * 43758.5453; return n - Math.floor(n); }; const s = t => t * t * (3 - 2 * t); const a = h(gx, gy), b = h(gx + 1, gy), c = h(gx, gy + 1), d = h(gx + 1, gy + 1); return lerp(lerp(a, b, s(fx)), lerp(c, d, s(fx)), s(fy)); }
+function buildVials(w){
+  const cx = w.cx, cz = w.cz, g = new THREE.Group(); g.position.set(cx, 0, cz); gallery.add(g);
+  bx(4.2, 0.8, 1.5, white, 0, 0.4, 0, g); for (let i = 0; i < 6; i++) bx(0.62, 0.62, 0.01, lam(i % 2 ? '#e1ecec' : '#d3e6e5'), -1.75 + i * 0.7, 0.42, 0.755, g); bx(4.3, 0.06, 1.62, steel, 0, 0.83, 0, g); bx(4.3, 0.08, 0.02, teal, 0, 0.78, 0.82, g);
+  w.plaque.position.set(cx, 0.43, cz + 0.77);
+  const R = 5, C = 10, N = 30, n = R * C * N, glass = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.0145, 0.0145, 0.1, 8), new THREE.MeshLambertMaterial({ color: '#d9ecef', transparent: true, opacity: 0.32, depthWrite: false }), n), liq = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.0115, 0.0115, 1, 8), new THREE.MeshLambertMaterial({ color: '#ffffff' }), n);
+  glass.frustumCulled = false; liq.frustumCulled = false; dynamic.add(glass); dynamic.add(liq);
+  const pal = ['#b9c4cc', '#e0b3a8', '#ec8f7b', '#e8563a', '#c9271f'].map(c => new THREE.Color(c)), st = [], dm = new THREE.Object3D(), base = 0.86 + 0.015;
+  for (let r = 0; r < R; r++){ bx(0.5, 0.025, 1.34, teal, -1.72 + r * 0.86, 0.865, 0, g); }
+  for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) for (let k = 0; k < N; k++){
+    const i = (r * C + c) * N + k, v = noise2((r * C + c) * 0.13 + 1.3, k * 0.17 + 2.1, 3) * 0.65 + noise2((r * C + c) * 0.36, k * 0.4, 8) * 0.35, s = Math.min(4, Math.floor(Math.max(0, Math.min(0.999, (v - 0.12) * 1.45)) * 5)); st.push(s); liq.setColorAt(i, pal[s]);
+    const x = cx - 1.72 + r * 0.86 + (c - 4.5) * 0.044, z = cz + (k - 14.5) * 0.044; dm.position.set(x, base + 0.05, z); dm.scale.set(1, 1, 1); dm.updateMatrix(); glass.setMatrixAt(i, dm.matrix);
+  }
+  glass.instanceMatrix.needsUpdate = true; addBoxCollider(cx, cz, 4.4, 1.8);
+  sculptures.push({ update(t){ let i = 0; for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) for (let k = 0; k < N; k++, i++){ const h = (0.014 + st[i] * 0.0175) * (1 + 0.1 * Math.sin(t * 1.3 + c * 0.5 + k * 0.17 + r)); dm.position.set(cx - 1.72 + r * 0.86 + (c - 4.5) * 0.044, base + h / 2, cz + (k - 14.5) * 0.044); dm.scale.set(1, h, 1); dm.updateMatrix(); liq.setMatrixAt(i, dm.matrix); } liq.instanceMatrix.needsUpdate = true; } });
+}
+function buildVitals(w){
+  const cx = w.cx, cz = w.cz, g = new THREE.Group(); g.position.set(cx, 0, cz); g.rotation.y = -Math.PI / 2; gallery.add(g);   // the screen faces the doorway you came in by
+  for (let i = 0; i < 5; i++){ const a = i * Math.PI * 2 / 5, leg = bx(0.5, 0.04, 0.06, dkSteel, Math.cos(a) * 0.25, 0.1, Math.sin(a) * 0.25, g); leg.rotation.y = -a; cyl(0.035, 0.035, 0.05, blk, Math.cos(a) * 0.5, 0.04, Math.sin(a) * 0.5, g, 8); }
+  cyl(0.03, 0.03, 1.2, dkSteel, 0, 0.7, 0, g, 10); bx(0.5, 0.04, 0.4, steel, 0, 0.55, 0, g); bx(1.2, 0.78, 0.1, lam('#1a1d21'), 0, 1.6, 0, g);
+  const SW = 512, SH = 300, sc = cvs(SW, SH), sg = sc.getContext('2d'), tex = new THREE.CanvasTexture(sc); tex.minFilter = THREE.LinearFilter; up(tex);
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.645), new THREE.MeshBasicMaterial({ map: tex })); scr.position.set(0, 1.6, 0.052); g.add(scr);
+  const gauss = (x, m, s) => Math.exp(-((x - m) * (x - m)) / (2 * s * s)), ecg = p => 0.12 * gauss(p, 0.15, 0.035) - 0.16 * gauss(p, 0.315, 0.012) + 1.0 * gauss(p, 0.34, 0.009) - 0.28 * gauss(p, 0.37, 0.012) + 0.26 * gauss(p, 0.6, 0.06);
+  function draw(t){
+    sg.fillStyle = '#02141a'; sg.fillRect(0, 0, SW, SH); sg.strokeStyle = 'rgba(60,255,160,.09)'; sg.lineWidth = 1; for (let x = 0; x < SW; x += 32){ sg.beginPath(); sg.moveTo(x, 0); sg.lineTo(x, SH); sg.stroke(); } for (let y = 0; y < SH; y += 32){ sg.beginPath(); sg.moveTo(0, y); sg.lineTo(SW, y); sg.stroke(); }
+    sg.fillStyle = '#4cffa0'; sg.font = '600 22px ' + F.sans; sg.textAlign = 'left'; sg.fillText('SENTIMENT', 18, 34); sg.font = '800 64px ' + F.sans; sg.textAlign = 'right'; sg.fillText('+36%', SW - 18, 70); sg.font = '500 15px ' + F.sans; sg.fillStyle = '#58b88a'; sg.fillText('ILLUSTRATIVE TRACE', SW - 18, 96);
+    sg.strokeStyle = '#4cffa0'; sg.lineWidth = 3; sg.lineJoin = 'round'; sg.beginPath();
+    for (let x = 0; x <= SW; x += 2){ const xn = x / SW, e = Math.min(1, Math.max(0, (xn - 0.12) / 0.7)), amp = 0.1 + 0.9 * e * e * (3 - 2 * e), ph = ((xn * 3.2 - t * 0.55) % 1 + 1) % 1, base = 215 - 34 * e, y = base - amp * 96 * ecg(ph) + (1 - e) * (Math.sin(x * 0.13 + t * 3) * 2.5); x ? sg.lineTo(x, y) : sg.moveTo(x, y); }
+    sg.stroke(); sg.fillStyle = 'rgba(2,20,26,.85)'; sg.fillRect(0, 118, 34, 3); tex.needsUpdate = true;
+  }
+  draw(0); let fr = 0; sculptures.push({ update(t){ if ((fr++ & 1) === 0) draw(t); } });
+  const sx = cx - 0.62; bx(0.04, 0.5, 0.04, dkSteel, sx, 0.25, cz - 0.28, gallery); bx(0.04, 0.5, 0.04, dkSteel, sx, 0.25, cz + 0.28, gallery); w.plaque.position.set(sx - 0.02, 0.52, cz); w.plaque.rotation.y = -Math.PI / 2;
+  addBoxCollider(cx, cz, 1.3, 1.3);
+}
+function buildWaiting(w){
+  const cx = w.cx, cz = w.cz, people = [], grey = new THREE.Color('#aeb2bb'), green = new THREE.Color('#2fa86a');
+  for (let row = 0; row < 3; row++) for (let j = 0; j < 4; j++){
+    const x = cx - 2.0 + row * 1.2, z = cz + (j - 1.5) * 0.58; chair(x, z, Math.PI / 2, '#2f78c4');
+    if ((row + j) % 5 === 4) continue; const m = lam('#aeb2bb'), p = new THREE.Group(); p.position.set(x - 0.04, 0.46, z); dynamic.add(p);
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.16, 0.46, 12), m); body.position.y = 0.27; p.add(body); const head = new THREE.Mesh(new THREE.SphereGeometry(0.105, 14, 10), m); head.position.y = 0.67; p.add(head); bx(0.34, 0.1, 0.16, m, 0.2, 0.1, 0, p); people.push({ p, m, head, phase: row * 0.9 + j * 0.45 });
+  }
+  const tx = cx + 2.1; bx(0.8, 0.46, 1.4, white, tx, 0.23, cz, gallery); bx(0.86, 0.04, 1.46, lam('#d9c4a1'), tx, 0.48, cz, gallery); ['#e5322b', '#2f78c4', '#2fa86a', '#f6cd7f'].forEach((c, i) => { const mg = bx(0.22, 0.01, 0.3, lam(c), tx - 0.1 + (i % 2) * 0.2, 0.51 + i * 0.008, cz - 0.4 + i * 0.27, gallery); mg.rotation.y = i * 0.5; });
+  w.plaque.position.set(tx - 0.405, 0.28, cz); w.plaque.rotation.y = -Math.PI / 2; addBoxCollider(cx - 0.8, cz, 3.7, 2.7); addBoxCollider(tx, cz, 1.0, 1.6);
+  sculptures.push({ update(t){ people.forEach((q, i) => { const v = 0.5 + 0.5 * Math.sin(t * 0.8 - q.phase * 1.6), k = v * v; q.m.color.copy(grey).lerp(green, k); q.head.position.y = 0.67 + k * 0.03; q.p.scale.setScalar(1 + k * 0.05); }); } });
+}
+
+/* ---------- baking the artwork and assembling the hospital ---------- */
+const nextFrame = () => new Promise(r => setTimeout(r, 0));
+async function ensureFonts(){ try { await Promise.all(['700 40px "Playfair Display"', 'italic 700 40px "Playfair Display"', 'italic 400 40px "Playfair Display"', '400 40px "Playfair Display"', '400 20px "DM Sans"', '500 20px "DM Sans"', '700 20px "DM Sans"', '800 20px "DM Sans"'].map(f => document.fonts.load(f))); } catch (e) {} }
+async function bake(progress){
+  await ensureFonts(); const list = WORKS.filter(w => w.art), aniso = renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 4;
+  for (let i = 0; i < list.length; i++){
+    const w = list[i], wpx = (w.art === 'title' || w.art === 'toolkit') ? 1536 : Math.min(1152, Math.round(w.w * 470)), hpx = Math.round(wpx * w.h / w.w), c = cvs(wpx, hpx), g = c.getContext('2d');
+    ART[w.art](g, wpx, hpx); const t = new THREE.CanvasTexture(c); t.anisotropy = Math.min(4, aniso); t.minFilter = THREE.LinearMipmapLinearFilter; w.tex = up(t); progress((i + 1) / list.length); if (i % 3 === 2) await nextFrame();
+  }
+}
+function assemble(){
+  buildOutside(); buildHospital();
+  WORKS.forEach(w => { if (w.kind === 'window') placeWindowBase(w); else if (w.kind === 'sculpture'){ placeSculptureBase(w); if (w.sculpt === 'vials') buildVials(w); else if (w.sculpt === 'vitals') buildVitals(w); else buildWaiting(w); } else placeWork(w); });
+  DIV.forEach(x => { colliders.push({ x0: x - 0.15, x1: x + 0.15, z0: 0, z1: SIDE }, { x0: x - 0.15, x1: x + 0.15, z0: DEPTH - SIDE, z1: DEPTH }); });
+  [[1.1, 10.8], [82.8, 10.9], [45.1, 1.1], [13.1, 10.9], [43.1, 11.0]].forEach(p => addBoxCollider(p[0], p[1], 0.6, 0.6));
+  mirrorObj = gallery.clone(true); mirrorObj.scale.y = -1; scene.add(mirrorObj); mirrorObj.visible = !LITE;   // a soft reflection in the polished vinyl floor
+}
+
+/* ---------- outside the window: lawn, trees, road, cars, skyline and a very large billboard ---------- */
+function placeWindowBase(w){
+  // a clickable (invisible) pane over the window and a museum label on the wall beside it
+  const cx = (WIN.x0 + WIN.x1) / 2, pane = new THREE.Mesh(new THREE.PlaneGeometry(WIN.x1 - WIN.x0, WIN.y1 - WIN.y0), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+  pane.position.set(cx, (WIN.y0 + WIN.y1) / 2, DEPTH - 0.12); pane.rotation.y = Math.PI; gallery.add(pane); workOf.set(pane, w); hits.push(pane); w.art3 = pane;
+  const lab = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.234), new THREE.MeshBasicMaterial({ map: labelTexture(w) })); lab.position.set(WIN.x0 - 0.5, 1.3, DEPTH - 0.108); lab.rotation.y = Math.PI; gallery.add(lab); workOf.set(lab, w); hits.push(lab);
+}
+function buildOutside(){
+  const out = new THREE.Group(); scene.add(out);
+  scene.fog = new THREE.Fog('#d9e8f3', 120, 340); camera.far = 700; camera.near = 0.08; camera.updateProjectionMatrix();
+  const R = (() => { let a = 77; return () => { a = (a * 16807) % 2147483647; return a / 2147483647; }; })();
+  // sky dome with soft clouds
+  const sc = cvs(8, 512), sg = sc.getContext('2d'), gr = sg.createLinearGradient(0, 0, 0, 512); gr.addColorStop(0, '#5ea8e6'); gr.addColorStop(0.45, '#9ccdf2'); gr.addColorStop(0.5, '#dcecf6'); gr.addColorStop(1, '#e9f2f7'); sg.fillStyle = gr; sg.fillRect(0, 0, 8, 512);
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(450, 24, 16), new THREE.MeshBasicMaterial({ map: up(new THREE.CanvasTexture(sc)), side: THREE.BackSide, depthWrite: false, fog: false })); sky.position.set(42, 0, 100); out.add(sky);
+  const cloudMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.92, fog: false });
+  for (let i = 0; i < 9; i++){ const c = new THREE.Group(); for (let k = 0; k < 5; k++){ const b = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), cloudMat); b.scale.set(14 + R() * 12, 5 + R() * 4, 8 + R() * 4); b.position.set((k - 2) * 15 + R() * 6, R() * 4, R() * 6); c.add(b); } c.position.set(-80 + i * 40 + R() * 20, 90 + R() * 40, 230 + R() * 100); out.add(c); }
+  // lawn, footpath, road with markings, pavements
+  const gc = cvs(256, 256), gg = gc.getContext('2d'); gg.fillStyle = '#5b9a4c'; gg.fillRect(0, 0, 256, 256); for (let i = 0; i < 900; i++){ gg.fillStyle = 'rgba(' + (60 + R() * 40 | 0) + ',' + (120 + R() * 50 | 0) + ',' + (40 + R() * 30 | 0) + ',.35)'; gg.fillRect(R() * 256, R() * 256, 3 + R() * 6, 2 + R() * 4); }
+  const gt = up(new THREE.CanvasTexture(gc)); gt.wrapS = gt.wrapT = THREE.RepeatWrapping; gt.repeat.set(60, 60);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), new THREE.MeshLambertMaterial({ map: gt })); ground.rotation.x = -Math.PI / 2; ground.position.set(42, -0.06, 300); out.add(ground);
+  const rc = cvs(1024, 128), rg = rc.getContext('2d'); rg.fillStyle = '#3b3d44'; rg.fillRect(0, 0, 1024, 128); rg.fillStyle = '#e9e6dd'; for (let x = 0; x < 1024; x += 128) rg.fillRect(x + 20, 61, 70, 6); rg.fillRect(0, 6, 1024, 4); rg.fillRect(0, 118, 1024, 4);
+  const rt = up(new THREE.CanvasTexture(rc)); rt.wrapS = THREE.RepeatWrapping; rt.repeat.set(30, 1);
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(400, 11), new THREE.MeshLambertMaterial({ map: rt })); road.rotation.x = -Math.PI / 2; road.position.set(42, 0.0, 31); out.add(road);
+  const pave = new THREE.MeshLambertMaterial({ color: '#b9b5ab' });
+  for (const z of [24.4, 37.6]){ const p = new THREE.Mesh(new THREE.BoxGeometry(400, 0.16, 3.2), pave); p.position.set(42, 0.04, z); out.add(p); }
+  const path = new THREE.Mesh(new THREE.BoxGeometry(400, 0.04, 2.2), pave); path.position.set(42, -0.03, 15.6); out.add(path);
+  // trees: street trees along the near pavement and a grove beyond the road (instanced, flat-shaded like the Dash city)
+  const spots = []; for (let x = -10; x < 100; x += 8) { const xx = x + R() * 2; if (xx > 29 && xx < 43) continue; spots.push([xx, 22.4 + R() * 0.6, 0.75 + R() * 0.25]); }
+  for (let i = 0; i < 70; i++){ const x = -20 + R() * 130, z = 42 + R() * 60; if (Math.abs(x - 36) < 16 && z > 40 && z < 60) continue; spots.push([x, z, 1.1 + R() * 0.9]); }
+  for (let i = 0; i < 18; i++){ const x = -10 + R() * 110; if (x > 27 && x < 45) continue; spots.push([x, 14 + R() * 4, 0.8 + R() * 0.5]); }
+  const trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.14, 0.2, 1, 7), new THREE.MeshLambertMaterial({ color: '#6b4a2e' }), spots.length), crowns = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshLambertMaterial({ color: '#ffffff' }), spots.length), dm = new THREE.Object3D(), greens = ['#4f9d4f', '#5fb057', '#3f8a48', '#6bbb5e'];
+  trunks.frustumCulled = false; crowns.frustumCulled = false;
+  spots.forEach((s, i) => { const k = s[2]; dm.position.set(s[0], 0.9 * k, s[1]); dm.rotation.set(0, 0, 0); dm.scale.set(k, 1.8 * k, k); dm.updateMatrix(); trunks.setMatrixAt(i, dm.matrix); dm.position.set(s[0], 2.6 * k, s[1]); dm.rotation.set(R() * 0.4, R() * 3, R() * 0.4); dm.scale.set(1.7 * k, 1.9 * k, 1.7 * k); dm.updateMatrix(); crowns.setMatrixAt(i, dm.matrix); crowns.setColorAt(i, new THREE.Color(greens[i % 4])); });
+  out.add(trunks); out.add(crowns);
+  // the skyline, far away
+  const bc = cvs(64, 128), bg2 = bc.getContext('2d'); bg2.fillStyle = '#ffffff'; bg2.fillRect(0, 0, 64, 128); bg2.fillStyle = 'rgba(40,60,90,.55)'; for (let y = 6; y < 124; y += 12) for (let x = 6; x < 60; x += 14) bg2.fillRect(x, y, 8, 7);
+  const bt = up(new THREE.CanvasTexture(bc)), bm = new THREE.MeshLambertMaterial({ map: bt, color: '#ffffff' }), blds = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), bm, 46); blds.frustumCulled = false; const tints = ['#c9ced6', '#d8cfc4', '#b9c2cf', '#d3c9d6', '#c4d2cb'];
+  for (let i = 0; i < 46; i++){ const w = 14 + R() * 16, h = 26 + R() * 62, x = -70 + i * 4.8 + R() * 6, z = 140 + R() * 55; dm.position.set(x, h / 2, z); dm.rotation.set(0, 0, 0); dm.scale.set(w, h, w); dm.updateMatrix(); blds.setMatrixAt(i, dm.matrix); blds.setColorAt(i, new THREE.Color(tints[i % 5])); }
+  out.add(blds);
+  // moving cars on the road
+  const carCols = ['#e5322b', '#2446d8', '#f2c14e', '#1f9d63', '#f4f1ec', '#8a5cf6'], cars = [];
+  for (let i = 0; i < 7; i++){ const g = new THREE.Group(), body = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.9, 1.8), new THREE.MeshLambertMaterial({ color: carCols[i % 6] })); body.position.y = 0.7; g.add(body); const cab = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 1.6), new THREE.MeshLambertMaterial({ color: '#9ec3dc' })); cab.position.set(-0.2, 1.5, 0); g.add(cab);
+    if (i === 2 || i === 5){ body.material.color.set('#ffffff'); body.scale.set(1.15, 1.35, 1); body.position.y = 0.85; cab.visible = false; const gs = new THREE.MeshLambertMaterial({ color: '#2fa86a' }); const st = new THREE.Mesh(new THREE.BoxGeometry(4.9, 0.16, 1.82), gs); st.position.y = 0.8; g.add(st); const lb = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.28), new THREE.MeshBasicMaterial({ color: '#2f78c4' })); lb.position.set(0.3, 1.6, 0); g.add(lb); const cr = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), new THREE.MeshBasicMaterial({ map: labelTex((q, W, H) => { q.fillStyle = '#ffffff'; q.fillRect(0, 0, W, H); cross(q, W / 2, H / 2, 84, '#e5322b'); }, 128, 128) })); cr.position.set(-0.3, 1.0, 0.911); g.add(cr); const cr2 = cr.clone(); cr2.position.z = -0.911; cr2.rotation.y = Math.PI; g.add(cr2); }
+    for (const sx of [-1.3, 1.3]) for (const sz of [-0.9, 0.9]){ const wh = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.3, 10), new THREE.MeshLambertMaterial({ color: '#16161a' })); wh.rotation.x = Math.PI / 2; wh.position.set(sx, 0.34, sz); g.add(wh); }
+    const dir = i % 2 ? 1 : -1; g.position.set(-20 + i * 22, 0, dir > 0 ? 33.4 : 28.6); g.rotation.y = dir > 0 ? 0 : Math.PI; out.add(g); cars.push({ g, dir, sp: 5 + R() * 5 }); }
+  sculptures.push({ update(t, dt){ cars.forEach(c => { c.g.position.x += c.dir * c.sp * (dt || 0.016); if (c.g.position.x > 110) c.g.position.x = -40; if (c.g.position.x < -40) c.g.position.x = 110; }); } });
+  { const hs = new THREE.Group(); hs.position.set(24, 0, 24.6); out.add(hs); const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 3.4, 8), new THREE.MeshLambertMaterial({ color: '#4a4d55' })); pole.position.y = 1.7; hs.add(pole); const pl = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map: labelTex((q, W, H) => { q.fillStyle = '#1d5fa8'; q.fillRect(0, 0, W, H); q.strokeStyle = '#fff'; q.lineWidth = 10; q.strokeRect(12, 12, W - 24, H - 24); txt(q, 'H', W / 2, H / 2 + 52, 170, F.sans, '#ffffff', 'center', '800'); }, 256, 256) })); pl.position.set(0, 3.0, 0.08); pl.rotation.y = Math.PI; hs.add(pl); }
+  // the billboard: hung from a gantry between two steel posts
+  const BW = 28, BH = 12, BX = 36, BY = 7.6, BZ = 48, steel = new THREE.MeshLambertMaterial({ color: '#4a4d55' }), dark = new THREE.MeshLambertMaterial({ color: '#17181c' });
+  const wpx = 2048, hpx = Math.round(wpx * BH / BW), bcv = cvs(wpx, hpx); ART.billboard(bcv.getContext('2d'), wpx, hpx); const btex = new THREE.CanvasTexture(bcv); btex.anisotropy = 4; up(btex);
+  const board = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), new THREE.MeshBasicMaterial({ map: btex })); board.position.set(BX, BY, BZ); board.rotation.y = Math.PI; out.add(board);
+  const back = new THREE.Mesh(new THREE.BoxGeometry(BW + 0.8, BH + 0.8, 0.5), dark); back.position.set(BX, BY, BZ + 0.3); out.add(back);
+  for (const s of [-1, 1]){ const post = new THREE.Mesh(new THREE.BoxGeometry(1.1, BY + BH / 2 + 4, 1.1), steel); post.position.set(BX + s * (BW / 2 + 1.5), (BY + BH / 2 + 4) / 2, BZ + 1.2); out.add(post); }
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(BW + 6, 0.8, 0.9), steel); beam.position.set(BX, BY + BH / 2 + 3.8, BZ + 1.2); out.add(beam);
+  for (const s of [-1, 1]){ const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.6, 6), dark); cable.position.set(BX + s * (BW / 2 - 1), BY + BH / 2 + 2, BZ + 0.5); out.add(cable); }
+  const cat = new THREE.Mesh(new THREE.BoxGeometry(BW, 0.25, 1.2), steel); cat.position.set(BX, BY - BH / 2 - 0.5, BZ - 0.7); out.add(cat);
+  const lampMat = new THREE.MeshBasicMaterial({ color: '#fff5d6' }); for (let i = 0; i < 7; i++){ const l = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.35, 0.8), lampMat); l.position.set(BX - BW / 2 + 2 + i * ((BW - 4) / 6), BY + BH / 2 + 0.9, BZ - 0.55); out.add(l); }
+}
+
+/* ---------- walking, looking, focusing ---------- */
+const P = { x: 6, z: 10.5, yaw: 0, pitch: -0.03, vx: 0, vz: 0 }, CAM = { x: 6, y: EYE, z: 10.5, yaw: 0, pitch: -0.03 };
+const keys = {}, mouse = { x: 0, y: 0, in: false }, joy = { x: 0, y: 0, id: null };
+let mode = 'load', locked = false, dragging = false, dragMoved = 0, T = 0, bobT = 0, tw = null, hover = null, tour = null, mapOpen = false, lastMap = 0;
+const ray = new THREE.Raycaster(); ray.far = 9;
+const hoverBars = (() => { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: '#0a8f8f' }); for (let i = 0; i < 4; i++) g.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 0.02), m)); g.visible = false; scene.add(g); return g; })();
+function blocked(x, z){ const r = 0.32; if (x < 0.45 || x > END - 0.45 || z < 0.45 || z > DEPTH - 0.45) return true; for (const c of colliders) if (x > c.x0 - r && x < c.x1 + r && z > c.z0 - r && z < c.z1 + r) return true; return false; }
+function moveStep(dt){
+  const sp = (keys.ShiftLeft || keys.ShiftRight) ? 5.6 : 3.1;
+  let fwd = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - joy.y, str = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joy.x;
+  const len = Math.hypot(fwd, str); if (len > 1){ fwd /= len; str /= len; }
+  const sy = Math.sin(P.yaw), cy = Math.cos(P.yaw), tx = (-sy * fwd + cy * str) * sp, tz = (-cy * fwd - sy * str) * sp;
+  P.vx = lerp(P.vx, tx, 1 - Math.exp(-dt * 10)); P.vz = lerp(P.vz, tz, 1 - Math.exp(-dt * 10));
+  const nx = P.x + P.vx * dt, nz = P.z + P.vz * dt; if (!blocked(nx, P.z)) P.x = nx; else P.vx = 0; if (!blocked(P.x, nz)) P.z = nz; else P.vz = 0;
+  P.yaw += ((keys.ArrowLeft || keys.KeyQ ? 1 : 0) - (keys.ArrowRight || keys.KeyE ? 1 : 0)) * 1.8 * dt;
+  const spd = Math.hypot(P.vx, P.vz); bobT += spd * dt * 2.3;
+  CAM.x = P.x; CAM.z = P.z; CAM.y = EYE + Math.sin(bobT) * 0.017 * Math.min(1, spd / 3); CAM.yaw = P.yaw; CAM.pitch = P.pitch;
+}
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const angDiff = (a, b) => { let d = (b - a) % (Math.PI * 2); if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2; return d; };
+function focusPose(w){
+  if (w.kind === 'sculpture' || w.kind === 'window'){ const f = new THREE.Vector3(w.look[0] - w.view[0], w.look[1] - w.view[1], w.look[2] - w.view[2]); return { x: w.view[0], y: w.view[1], z: w.view[2], yaw: Math.atan2(-f.x, -f.z), pitch: Math.atan2(f.y, Math.hypot(f.x, f.z)) }; }
+  const tv = Math.tan(camera.fov * Math.PI / 360), th = tv * camera.aspect, wide = window.innerWidth > 820;
+  const d = clamp(Math.max(w.h / (2 * 0.62 * tv), w.w / (2 * (wide ? 0.5 : 0.7) * th)), 1.9, 7.6), s = wide ? 0.3 * d * th : 0, p = w.p;
+  return { x: p.pos.x + p.n.x * d + p.right.x * s, y: clamp(p.pos.y, 1.5, 2.3), z: p.pos.z + p.n.z * d + p.right.z * s, yaw: p.yaw, pitch: 0 };
+}
+function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+function showPanel(w){
+  const i = TOUR.indexOf(w), pill = w.pillars.map(k => '<div class="pill"><i style="background:' + PILLARS[k][1] + '"></i>' + PILLARS[k][0] + '</div>').join('');
+  $('panel').innerHTML = '<button class="x" id="pX" aria-label="Close (Esc)" title="Close (Esc)">&#10005;</button><div class="id">' + w.id + '</div><h2>' + esc(w.title) + '</h2><p class="meta"><em>' + esc(w.sub || '') + '</em><br>' + esc(w.medium || '') + '</p>' + pill + '<p class="body">' + esc(w.text || '') + '</p>' + (w.why ? '<div class="why"><b>Why it matters for Asterix</b>' + esc(w.why) + '</div>' : '') + '<div class="chips">' + w.chips.map(c => '<span>' + esc(c) + '</span>').join('') + '</div><div class="nav"><button class="btn" id="pPrev">Previous</button><button class="btn primary" id="pNext">Next</button><button class="btn" id="pClose">Close</button><span class="count">' + (i + 1) + ' / ' + TOUR.length + '</span></div>';
+  $('panel').hidden = false; $('pPrev').onclick = () => stepWork(-1); $('pNext').onclick = () => stepWork(1); $('pClose').onclick = leaveFocus; $('pX').onclick = leaveFocus;
+}
+function focusWork(w){
+  if (!w || w.kind === 'vinyl') return; mode = 'focus'; hover = null; hoverBars.visible = false; $('tip').hidden = true; $('hint').hidden = true; $('cross').hidden = true; $('xClose').hidden = false;
+  if (document.exitPointerLock && locked) document.exitPointerLock();
+  const to = focusPose(w); tw = { from: { x: CAM.x, y: CAM.y, z: CAM.z, yaw: CAM.yaw, pitch: CAM.pitch }, to, t: 0, dur: REDUCED ? 0.01 : 1.15 }; CAM.w = w; showPanel(w);
+}
+function stepWork(d){ const w = CAM.w, i = TOUR.indexOf(w); const n = TOUR[(i + d + TOUR.length) % TOUR.length]; if (tour) tour.t = 0; focusWork(n); }
+function leaveFocus(){
+  if (mode !== 'focus') return; tour = null; $('tourbar').hidden = true; $('panel').hidden = true; $('xClose').hidden = true; tw = null; mode = 'walk';
+  let x = CAM.x, z = CAM.z, k = 0; while (blocked(x, z) && k++ < 40){ x += Math.sin(CAM.yaw) * 0.2; z += Math.cos(CAM.yaw) * 0.2; } P.x = clamp(x, 0.5, END - 0.5); P.z = clamp(z, 0.5, DEPTH - 0.5); P.yaw = CAM.yaw; P.pitch = clamp(CAM.pitch, -1, 1); P.vx = P.vz = 0; CAM.w = null; $('cross').hidden = !locked;
+}
+function startTour(i0){ if (mode === 'load') return; if (mode === 'focus' && !tour) leaveFocus(); tour = { t: 0 }; $('tourbar').hidden = false; $('map').hidden = true; mapOpen = false; focusWork(TOUR[i0 || 0]); }
+function stopTour(){ tour = null; $('tourbar').hidden = true; }
+function teleport(x, z, yaw){ if (mode === 'focus') leaveFocus(); P.x = x; P.z = z; P.yaw = yaw; P.pitch = -0.03; P.vx = P.vz = 0; }
+function goRoom(i){ if (i === 0) teleport(6, 10.4, 0); else teleport(ROOMS[i].x0 + 2.4, 6, -Math.PI / 2); }
+
+/* ---------- picking and hover ---------- */
+function pick(ndcX, ndcY){ ray.setFromCamera({ x: ndcX, y: ndcY }, camera); const h = ray.intersectObjects(hits, false); return h.length ? workOf.get(h[0].object) : null; }
+function updateHover(){
+  if (mode !== 'walk'){ return; }
+  let w = null; if (locked) w = pick(0, 0); else if (mouse.in && !TOUCH) w = pick(mouse.x / window.innerWidth * 2 - 1, -(mouse.y / window.innerHeight * 2 - 1));
+  if (w !== hover){ hover = w; const tip = $('tip'); if (w){ tip.hidden = false; tip.innerHTML = '<i>' + w.id + '</i>' + esc(w.title) + ' <span style="color:#6a6c75;font-weight:500">(click to inspect)</span>'; if (!locked){ tip.style.left = '50%'; tip.style.top = 'calc(50% + 26px)'; } } else tip.hidden = true; }
+  if (hover && hover.kind !== 'sculpture' && hover.kind !== 'window' && hover.p){ const w2 = hover, pad = 0.12, b = 0.035, W = w2.w + 2 * pad, H = w2.h + 2 * pad, bars = hoverBars.children; hoverBars.position.copy(w2.p.pos).addScaledVector(w2.p.n, 0.075); hoverBars.rotation.y = w2.p.yaw;
+    bars[0].scale.set(W, b, 1); bars[0].position.set(0, H / 2, 0); bars[1].scale.set(W, b, 1); bars[1].position.set(0, -H / 2, 0); bars[2].scale.set(b, H, 1); bars[2].position.set(-W / 2, 0, 0); bars[3].scale.set(b, H, 1); bars[3].position.set(W / 2, 0, 0); hoverBars.visible = true; } else hoverBars.visible = false;
+  if (locked && hover){ $('tip').style.left = '50%'; }
+}
+
+/* ---------- input ---------- */
+const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyQ', 'KeyE', 'ShiftLeft', 'ShiftRight'];
+window.addEventListener('keydown', e => {
+  if (mode === 'load') return;
+  if (e.code === 'KeyM'){ toggleMap(); return; }
+  if (e.code === 'KeyT'){ tour ? stopTour() : startTour(0); return; }
+  if (mode === 'focus'){
+    if (e.code === 'Escape'){ leaveFocus(); return; }
+    if (e.code === 'ArrowRight' || e.code === 'KeyD'){ e.preventDefault(); stepWork(1); return; }
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA'){ e.preventDefault(); stepWork(-1); return; }
+    return;
+  }
+  if (MOVE_KEYS.includes(e.code)){ keys[e.code] = true; e.preventDefault(); }
+  if (e.code === 'Escape' && mapOpen) toggleMap();
+});
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+canvas.addEventListener('mousedown', e => { dragging = true; dragMoved = 0; });
+window.addEventListener('mouseup', () => { dragging = false; });
+window.addEventListener('mousemove', e => {
+  mouse.x = e.clientX; mouse.y = e.clientY; mouse.in = true; if (mode !== 'walk') return;
+  if (locked){ P.yaw -= e.movementX * 0.0022; P.pitch = clamp(P.pitch - e.movementY * 0.0022, -1.2, 1.2); }
+  else if (dragging){ dragMoved += Math.abs(e.movementX) + Math.abs(e.movementY); P.yaw -= e.movementX * 0.0035; P.pitch = clamp(P.pitch - e.movementY * 0.0035, -1.2, 1.2); }
+});
+canvas.addEventListener('mouseleave', () => { mouse.in = false; });
+canvas.addEventListener('click', e => {
+  if (mode === 'focus'){ if (dragMoved <= 6) leaveFocus(); return; }
+  if (mode !== 'walk' || dragMoved > 6) return;
+  const w = locked ? hover : pick(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight * 2 - 1));
+  if (w && w.kind !== 'vinyl'){ focusWork(w); return; }
+  if (!TOUCH && !locked && canvas.requestPointerLock){ try { canvas.requestPointerLock(); } catch (err) {} }
+});
+document.addEventListener('pointerlockchange', () => { locked = document.pointerLockElement === canvas; canvas.classList.toggle('locked', locked); $('cross').hidden = !locked || mode !== 'walk'; if (!locked){ hover = null; $('tip').hidden = true; } });
+// touch: joystick on the left, drag to look on the right, tap a work to inspect it
+const joyEl = $('joy'); let lookId = null, lx = 0, ly = 0, tapT = 0, tapMoved = 0;
+joyEl.addEventListener('touchstart', e => { const t = e.changedTouches[0]; joy.id = t.identifier; e.preventDefault(); }, { passive: false });
+joyEl.addEventListener('touchmove', e => { for (const t of e.changedTouches) if (t.identifier === joy.id){ const r = joyEl.getBoundingClientRect(), dx = (t.clientX - (r.left + r.width / 2)) / (r.width / 2), dy = (t.clientY - (r.top + r.height / 2)) / (r.height / 2), l = Math.hypot(dx, dy) || 1, k = Math.min(1, l); joy.x = dx / l * k; joy.y = dy / l * k; joyEl.firstElementChild.style.transform = 'translate(' + joy.x * 36 + 'px,' + joy.y * 36 + 'px)'; } e.preventDefault(); }, { passive: false });
+const joyEnd = e => { for (const t of e.changedTouches) if (t.identifier === joy.id){ joy.id = null; joy.x = joy.y = 0; joyEl.firstElementChild.style.transform = ''; } };
+joyEl.addEventListener('touchend', joyEnd); joyEl.addEventListener('touchcancel', joyEnd);
+canvas.addEventListener('touchstart', e => { const t = e.changedTouches[0]; lookId = t.identifier; lx = t.clientX; ly = t.clientY; tapT = performance.now(); tapMoved = 0; }, { passive: true });
+canvas.addEventListener('touchmove', e => { for (const t of e.changedTouches) if (t.identifier === lookId && mode === 'walk'){ P.yaw -= (t.clientX - lx) * 0.005; P.pitch = clamp(P.pitch - (t.clientY - ly) * 0.005, -1.2, 1.2); tapMoved += Math.abs(t.clientX - lx) + Math.abs(t.clientY - ly); lx = t.clientX; ly = t.clientY; } }, { passive: true });
+canvas.addEventListener('touchend', e => { const t = e.changedTouches[0]; if (t.identifier === lookId && mode === 'walk' && tapMoved < 10 && performance.now() - tapT < 400){ const w = pick(t.clientX / window.innerWidth * 2 - 1, -(t.clientY / window.innerHeight * 2 - 1)); if (w && w.kind !== 'vinyl') focusWork(w); } });
+
+/* ---------- floor plan ---------- */
+function toggleMap(){ if (mode === 'load') return; mapOpen = !mapOpen; $('map').hidden = !mapOpen; if (mapOpen) drawMap(); }
+const mapc = $('mapc'), MW = 1520, MH = 300, MS = (MW - 40) / END;
+function drawMap(){
+  const g = mapc.getContext('2d'); g.clearRect(0, 0, MW, MH); g.fillStyle = '#faf8f3'; g.fillRect(0, 0, MW, MH); const oy = 40, ox = 20;
+  ROOMS.forEach((r, i) => { g.fillStyle = (i % 2 ? '#f1ede4' : '#f7f4ec'); g.fillRect(ox + r.x0 * MS, oy, (r.x1 - r.x0) * MS, DEPTH * MS); g.fillStyle = '#14151a'; g.font = '700 17px "DM Sans", Arial, sans-serif'; g.textAlign = 'center'; g.fillText(r.name.split(':')[0], ox + (r.x0 + r.x1) / 2 * MS, oy - 14); });
+  g.strokeStyle = '#14151a'; g.lineWidth = 3; g.strokeRect(ox, oy, END * MS, DEPTH * MS);
+  DIV.forEach(x => { g.beginPath(); g.moveTo(ox + x * MS, oy); g.lineTo(ox + x * MS, oy + SIDE * MS); g.moveTo(ox + x * MS, oy + (DEPTH - SIDE) * MS); g.lineTo(ox + x * MS, oy + DEPTH * MS); g.stroke(); });
+  WORKS.forEach(w => { if (w.kind === 'window'){ g.fillStyle = '#2f8fd8'; g.fillRect(ox + WIN.x0 * MS, oy + DEPTH * MS - 5, (WIN.x1 - WIN.x0) * MS, 9); return; } if (w.kind === 'sculpture'){ g.fillStyle = '#2446d8'; g.beginPath(); g.arc(ox + w.cx * MS, oy + w.cz * MS, 10, 0, 6.3); g.fill(); return; } if (w.kind === 'vinyl' || !w.p) return; g.fillStyle = '#e5322b'; const x = ox + w.p.pos.x * MS, z = oy + w.p.pos.z * MS; g.beginPath(); g.arc(x + w.p.n.x * 4, z + w.p.n.z * 4, 5, 0, 6.3); g.fill(); });
+  const px = ox + CAM.x * MS, pz = oy + CAM.z * MS; g.save(); g.translate(px, pz); g.rotate(-CAM.yaw); g.fillStyle = '#14151a'; g.beginPath(); g.moveTo(0, -14); g.lineTo(9, 10); g.lineTo(-9, 10); g.closePath(); g.fill(); g.restore();
+}
+mapc.addEventListener('click', e => { const r = mapc.getBoundingClientRect(), wx = ((e.clientX - r.left) / r.width * MW - 20) / MS; const i = ROOMS.findIndex(rm => wx >= rm.x0 && wx < rm.x1); if (i >= 0){ goRoom(i); toggleMap(); } });
+
+/* ---------- buttons, loading and the main loop ---------- */
+$('bTour').onclick = () => (tour ? stopTour() : startTour(0)); $('bMap').onclick = toggleMap; $('bContact').onclick = () => { const w = WORKS.find(x => x.art === 'contact'); if (mode === 'focus' && !tour) CAM.w = null; stopTour(); focusWork(w); };
+$('bLite').onclick = () => setLite(!LITE); $('xClose').onclick = leaveFocus; $('tPrev').onclick = () => stepWork(-1); $('tNext').onclick = () => stepWork(1); $('tStop').onclick = () => { stopTour(); };
+function enter(withTour){
+  $('loading').style.opacity = 0; setTimeout(() => { $('loading').hidden = true; }, 600); mode = 'walk';
+  for (const id of ['brand', 'bar']) $(id).hidden = false; if (TOUCH) $('joy').hidden = false;
+  const h = $('hint'); h.hidden = false; h.innerHTML = TOUCH ? 'Joystick to walk. Drag to look. Tap a work to read it.' : 'Click or drag to look around. <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to walk, <kbd>Shift</kbd> to run. Click a work to inspect it. <kbd>M</kbd> floor plan, <kbd>T</kbd> tour.';
+  setTimeout(() => { if (mode === 'walk'){ h.style.opacity = 0; setTimeout(() => { h.hidden = true; h.style.opacity = 1; }, 700); } }, 11000);
+  if (withTour) startTour(0);
+  else if (!TOUCH && canvas.requestPointerLock){ try { canvas.requestPointerLock(); } catch (e) {} }
+}
+$('enter').onclick = () => enter(false); $('enterTour').onclick = () => enter(true);
+function update(dt){
+  T += dt; sculptures.forEach(s => s.update(T, dt));
+  if (mode === 'walk') moveStep(dt);
+  else if (mode === 'focus' && tw){ tw.t = Math.min(1, tw.t + dt / tw.dur); const k = ease(tw.t), a = tw.from, b = tw.to; CAM.x = lerp(a.x, b.x, k); CAM.y = lerp(a.y, b.y, k); CAM.z = lerp(a.z, b.z, k); CAM.yaw = a.yaw + angDiff(a.yaw, b.yaw) * k; CAM.pitch = lerp(a.pitch, b.pitch, k); if (tw.t >= 1) tw = null; }
+  else if (mode === 'load'){ CAM.yaw = Math.sin(T * 0.15) * 0.12; }
+  camera.position.set(CAM.x, CAM.y, CAM.z); camera.rotation.set(CAM.pitch, CAM.yaw, 0);
+  updateHover();
+  if (tour && !tw){ tour.t += dt; const i = TOUR.indexOf(CAM.w); $('tourTxt').textContent = 'Tour ' + (i + 1) + ' of ' + TOUR.length; if (tour.t > 6.5) stepWork(1); }
+  if (mapOpen && T - lastMap > 0.12){ lastMap = T; drawMap(); }
+}
+let last = 0; const perf = { n: 0, sum: 0, done: false };
+function frame(ts){ const raw = last ? (ts - last) / 1000 : 0.016, dt = Math.min(0.05, raw); last = ts; update(dt);
+  if (!perf.done && mode !== 'load'){ perf.n++; if (perf.n > 40){ perf.sum += raw; if (perf.n === 160){ if (perf.sum / 120 > 0.034 && !LITE) setLite(true, 'Switched to smooth mode for your device. Use the Full quality button to switch back.'); perf.done = true; } } } renderer.render(scene, camera); requestAnimationFrame(frame); }
+const ready = (async () => {
+  await bake(p => { $('bar2').style.width = Math.round(p * 100) + '%'; }); assemble();
+  if (LITE) setLite(true); $('enter').disabled = false; $('enterTour').disabled = false; $('enter').textContent = 'Enter the waiting room'; $('bar2').style.width = '100%';
+})();
+requestAnimationFrame(frame);
+window.__gal = { ready, keys, tourState: () => tour, WORKS, TOUR, P, CAM, renderer, scene, camera, focusWork, leaveFocus, startTour, teleport, goRoom, enter, update, mode: () => mode, blocked, hits, pick, sculptures };
+
+
+})();
+</script>
+</body>
+</html>
